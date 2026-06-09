@@ -1,5 +1,5 @@
-import React from "react";
-import { ArrowRight, ChevronRight, Award, Shield, FileText, Sparkles, Building2, TrendingUp, Users } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { ArrowRight, TrendingUp, Shield, BarChart3 } from "lucide-react";
 
 interface HeroProps {
   onStartArchitect: () => void;
@@ -7,118 +7,217 @@ interface HeroProps {
   onViewAdvisors: () => void;
 }
 
-export default function Hero({ onStartArchitect, onViewServices, onViewAdvisors }: HeroProps) {
+const ALLOCATIONS = [
+  { label: "Global Equities", pct: 42, color: "#0d1c2e" },
+  { label: "Sovereign Bonds", pct: 23, color: "#D4AF37" },
+  { label: "Alternatives", pct: 18, color: "#2e5e4e" },
+  { label: "Real Estate", pct: 10, color: "#8b6914" },
+  { label: "Cash & Liquidity", pct: 7, color: "#c0c0c0" },
+];
+
+function PortfolioRing() {
+  const SIZE = 260;
+  const CX = SIZE / 2;
+  const CY = SIZE / 2;
+  const R_OUTER = 108;
+  const R_INNER = 72;
+  const GAP = 2.5; // degrees between segments
+
+  // Convert pct → arc degrees
+  const total = ALLOCATIONS.reduce((s, a) => s + a.pct, 0);
+  let cursor = -90; // start at top
+
+  const segments = ALLOCATIONS.map((a) => {
+    const deg = (a.pct / total) * 360 - GAP;
+    const start = cursor;
+    const end = cursor + deg;
+    cursor += deg + GAP;
+
+    const toRad = (d: number) => (d * Math.PI) / 180;
+    const x1 = CX + R_OUTER * Math.cos(toRad(start));
+    const y1 = CY + R_OUTER * Math.sin(toRad(start));
+    const x2 = CX + R_OUTER * Math.cos(toRad(end));
+    const y2 = CY + R_OUTER * Math.sin(toRad(end));
+    const x3 = CX + R_INNER * Math.cos(toRad(end));
+    const y3 = CY + R_INNER * Math.sin(toRad(end));
+    const x4 = CX + R_INNER * Math.cos(toRad(start));
+    const y4 = CY + R_INNER * Math.sin(toRad(start));
+    const large = deg > 180 ? 1 : 0;
+
+    const d = [
+      `M ${x1} ${y1}`,
+      `A ${R_OUTER} ${R_OUTER} 0 ${large} 1 ${x2} ${y2}`,
+      `L ${x3} ${y3}`,
+      `A ${R_INNER} ${R_INNER} 0 ${large} 0 ${x4} ${y4}`,
+      "Z",
+    ].join(" ");
+
+    return { ...a, d, deg };
+  });
+
+  const [hovered, setHovered] = useState<number | null>(null);
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setAnimated(true), 200);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="relative flex flex-col items-center">
+      <svg
+        width={SIZE}
+        height={SIZE}
+        viewBox={`0 0 ${SIZE} ${SIZE}`}
+        className="drop-shadow-xl"
+        style={{ filter: "drop-shadow(0 8px 32px rgba(13,28,46,0.18))" }}
+      >
+        {segments.map((seg, i) => (
+          <path
+            key={seg.label}
+            d={seg.d}
+            fill={seg.color}
+            opacity={animated ? (hovered === null || hovered === i ? 1 : 0.4) : 0}
+            style={{
+              transition: `opacity 0.3s ease, transform 0.3s ease`,
+              transformOrigin: `${CX}px ${CY}px`,
+              transform: hovered === i ? "scale(1.04)" : "scale(1)",
+              cursor: "pointer",
+            }}
+            onMouseEnter={() => setHovered(i)}
+            onMouseLeave={() => setHovered(null)}
+          />
+        ))}
+
+        {/* Centre text */}
+        <text x={CX} y={CY - 10} textAnchor="middle" fill="#0d1c2e" fontSize="22" fontFamily="Cormorant Garamond, Georgia, serif" fontWeight="600">
+          €12.4B
+        </text>
+        <text x={CX} y={CY + 10} textAnchor="middle" fill="#9ca3af" fontSize="9" fontFamily="DM Sans, sans-serif" letterSpacing="2">
+          ASSETS ADVISED
+        </text>
+
+        {/* Hover label */}
+        {hovered !== null && (
+          <>
+            <text x={CX} y={CY + 30} textAnchor="middle" fill="#D4AF37" fontSize="10" fontFamily="DM Sans, sans-serif" letterSpacing="1">
+              {segments[hovered].label}
+            </text>
+            <text x={CX} y={CY + 44} textAnchor="middle" fill="#0d1c2e" fontSize="14" fontFamily="Cormorant Garamond, serif" fontWeight="600">
+              {segments[hovered].pct}%
+            </text>
+          </>
+        )}
+      </svg>
+
+      {/* Legend */}
+      <div className="mt-5 space-y-1.5 w-full max-w-[220px]">
+        {ALLOCATIONS.map((a, i) => (
+          <div
+            key={a.label}
+            className="flex items-center justify-between text-xs cursor-default"
+            onMouseEnter={() => setHovered(i)}
+            onMouseLeave={() => setHovered(null)}
+            style={{ opacity: hovered === null || hovered === i ? 1 : 0.4, transition: "opacity 0.2s" }}
+          >
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: a.color }} />
+              <span className="font-sans text-gray-600">{a.label}</span>
+            </div>
+            <span className="font-serif text-brand-navy font-semibold">{a.pct}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function Hero({ onStartArchitect, onViewServices }: HeroProps) {
   return (
     <div className="bg-white">
       {/* Hero Core */}
-      <section className="relative pt-12 pb-16 md:py-24 px-5 overflow-hidden border-b border-border-subtle" id="hero-section">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
-          {/* Left Text / Actions */}
-          <div className="lg:col-span-7 space-y-6 md:space-y-8 z-10 text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-gold-light border border-brand-gold/20 rounded">
+      <section className="relative overflow-hidden border-b border-border-subtle" id="hero-section" style={{ minHeight: "92vh" }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 h-full" style={{ minHeight: "92vh" }}>
+
+          {/* Left Text */}
+          <div className="flex flex-col justify-center pl-10 md:pl-20 pr-0 md:pr-0 py-24 space-y-7 z-10"
+            style={{
+              marginRight: "-100px"
+            }}
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-gold-light border border-brand-gold/20 rounded w-fit">
               <span className="w-1.5 h-1.5 bg-brand-gold rounded-full animate-ping" />
-              <span className="font-sans text-[11px] font-bold uppercase tracking-[0.2em] text-brand-gold">
-                Strategic Excellence
+              <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.25em] text-brand-gold">
+                Private Wealth Advisory
               </span>
             </div>
-            
-            <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl text-brand-navy leading-tight tracking-tight max-w-2xl">
+
+            <h1 className="font-serif text-4xl sm:text-5xl md:text-[3.6rem] text-brand-navy leading-[1.08] tracking-tight max-w-xl" style={{ fontWeight: 700 }}>
               Institutional Trust,<br />
-              <span className="italic font-normal text-brand-gold">Bespoke Insights.</span>
+              <span className="italic text-brand-gold" style={{ fontWeight: 600 }}>Bespoke Insights.</span>
             </h1>
-            
-            <p className="font-sans text-base md:text-lg text-gray-500 max-w-xl leading-relaxed">
-              Navigating global markets with absolute precision. We provide sophisticated custody structures, localized tax mapping, and private wealth architecture for corporate entities and multi-generational family estates.
+
+            <p className="font-sans text-sm md:text-base text-gray-500 max-w-lg leading-relaxed">
+              Constantine Nixdorff provides strictly private wealth architecture, tax structuring, and portfolio governance for high-net-worth individuals, family offices, and corporate principals across the DACH region and beyond.
             </p>
-            
-            {/* CTA action cluster */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+
+            <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={onStartArchitect}
-                className="w-full sm:w-auto bg-brand-navy hover:bg-brand-navy-light text-white py-4 px-8 rounded font-sans text-xs font-bold tracking-[0.15em] uppercase flex items-center justify-center gap-2 group transition-all duration-300 shadow-md transform hover:-translate-y-0.5 active:translate-y-0"
-                id="hero-explore-btn"
+                className="w-full sm:w-auto bg-brand-navy hover:bg-brand-navy-light text-white py-4 px-8 rounded font-sans text-xs font-semibold tracking-[0.15em] uppercase flex items-center justify-center gap-2 group transition-all duration-300 shadow-md hover:-translate-y-0.5 active:translate-y-0"
               >
                 Launch Wealth Architect
                 <ArrowRight className="w-4 h-4 text-brand-gold group-hover:translate-x-1 transition-transform" />
               </button>
-              
               <button
                 onClick={onViewServices}
-                className="w-full sm:w-auto border border-brand-gold text-brand-navy hover:bg-brand-gold-light py-4 px-8 rounded font-sans text-xs font-bold tracking-[0.15em] uppercase transition-all duration-300"
-                id="hero-cases-btn"
+                className="w-full sm:w-auto border border-brand-gold text-brand-navy hover:bg-brand-gold-light py-4 px-8 rounded font-sans text-xs font-semibold tracking-[0.15em] uppercase transition-all duration-300"
               >
-                Explore Expertise Hub
+                Explore Services
               </button>
             </div>
 
             {/* Quick Metrics */}
-            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-100 max-w-lg">
+            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-100 max-w-md">
               <div>
-                <p className="font-serif text-2xl font-bold text-brand-navy">€12.4B</p>
-                <p className="font-sans text-[11px] text-gray-400 capitalize tracking-wider font-semibold">Assets Advised</p>
+                <p className="font-serif text-2xl text-brand-navy" style={{ fontWeight: 700 }}>€12.4B</p>
+                <p className="font-sans text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">Assets Advised</p>
               </div>
               <div>
-                <p className="font-serif text-2xl font-bold text-brand-navy">BaFin</p>
-                <p className="font-sans text-[11px] text-gray-400 capitalize tracking-wider font-semibold">Fully Regulated</p>
+                <p className="font-serif text-2xl text-brand-navy" style={{ fontWeight: 700 }}>BaFin</p>
+                <p className="font-sans text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">Regulated</p>
               </div>
               <div>
-                <p className="font-serif text-2xl font-bold text-brand-navy">99.2%</p>
-                <p className="font-sans text-[11px] text-gray-400 capitalize tracking-wider font-semibold">Retain Rate</p>
+                <p className="font-serif text-2xl text-brand-navy" style={{ fontWeight: 700 }}>99.2%</p>
+                <p className="font-sans text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">Client Retention</p>
               </div>
             </div>
           </div>
 
-          {/* Right Floating Sculpture / Interactive Metric Board */}
-          <div className="lg:col-span-5 relative flex items-center justify-center min-h-[350px] md:min-h-[450px]">
-            {/* Abstract Floating Circles matching HTML placeholder */}
-            <div className="absolute inset-0 bg-radial-gradient from-brand-gold-light/40 to-transparent opacity-60 z-0 rounded-full" />
-            
-            {/* Floating golden geometric widget */}
-            <div className="w-72 h-72 rounded-full border border-brand-gold/10 flex items-center justify-center animate-soft-float relative z-10">
-              <div className="w-56 h-56 rounded-full border border-brand-gold/25 flex items-center justify-center">
-                <div className="w-40 h-40 rounded-full border border-brand-navy/10 flex items-center justify-center bg-white shadow-xl relative">
-                  
-                  {/* Floating asset balance preview */}
-                  <div className="absolute -top-4 -right-12 bg-white/95 backdrop-blur border border-brand-gold/30 rounded p-3 shadow-lg max-w-[140px] text-left animate-soft-float delay-700">
-                    <div className="flex items-center gap-1.5 text-emerald-600 text-[10px] font-bold">
-                      <TrendingUp className="w-3.5 h-3.5" />
-                      <span>+12.4% ARR</span>
-                    </div>
-                    <p className="font-sans text-[11px] text-gray-600 mt-1">Core ESG Portfolio</p>
-                  </div>
-
-                  <div className="absolute -bottom-6 -left-8 bg-brand-navy text-white rounded p-3 shadow-lg text-left max-w-[150px]">
-                    <p className="font-sans text-[10px] uppercase text-brand-gold tracking-widest font-bold">Tax Yield</p>
-                    <p className="font-serif text-xs font-semibold mt-1">Spezialfonds Active Shield</p>
-                  </div>
-
-                  {/* Icon centering */}
-                  <Award className="w-16 h-16 text-brand-gold animate-slow-spin-reverse" />
-                </div>
-              </div>
-            </div>
-
-            {/* Background elements */}
-            <div className="absolute top-10 right-4 w-12 h-12 border border-brand-gold/20 rounded-full animate-pulse delay-500" />
-            <div className="absolute bottom-16 right-12 w-6 h-6 bg-brand-gold/10 rounded-full animate-bounce" />
+          {/* Right: Full-height portrait */}
+          <div className="hidden lg:block relative">
+            <img
+              src="/src/components/Hero.png"
+              alt="Constantine Nixdorff"
+              className="absolute inset-0 w-full h-full object-cover object-top"
+            />
           </div>
 
         </div>
       </section>
 
       {/* Trust Quote Bar */}
-      <section className="bg-brand-navy text-white py-12 px-5 relative overflow-hidden" id="trust-banner">
-        <div className="max-w-4xl mx-auto text-center space-y-4 relative z-10">
-          <blockquote className="font-serif text-lg md:text-xl italic text-brand-gold-light leading-relaxed">
-            "We don't believe in generic advice. Every portfolio we build is a permanent reflection of individual family legacy, corporate sovereignty, and focused growth targets."
+      <section className="bg-brand-navy text-white py-12 px-5 relative overflow-hidden">
+        <div className="max-w-3xl mx-auto text-center space-y-4 relative z-10">
+          <blockquote className="font-serif text-xl md:text-2xl italic text-brand-gold-light leading-relaxed" style={{ fontWeight: 500 }}>
+            "Every portfolio I build is a permanent reflection of your family legacy, sovereign ambition, and long-term vision."
           </blockquote>
-          <p className="font-sans text-xs uppercase tracking-[0.2em] text-brand-gold font-bold">
-            — Prestige Board of Directors
+          <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-brand-gold font-semibold">
+            — Constantine Nixdorff
           </p>
         </div>
-        <div className="absolute top-0 right-0 w-64 h-64 border-brand-gold/5 border rounded-full transform translate-x-20 -translate-y-20" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 border-brand-gold/5 border rounded-full transform -translate-x-20 translate-y-20" />
+        <div className="absolute top-0 right-0 w-64 h-64 border border-brand-gold/5 rounded-full transform translate-x-20 -translate-y-20" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 border border-brand-gold/5 rounded-full transform -translate-x-20 translate-y-20" />
       </section>
     </div>
   );

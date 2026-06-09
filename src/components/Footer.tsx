@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Award, Info, Mail, Phone, MapPin, Landmark } from "lucide-react";
+import { Mail, Phone, MapPin, Landmark } from "lucide-react";
 
 export default function Footer() {
   const [newsInput, setNewsInput] = useState<string>("");
@@ -55,12 +55,11 @@ export default function Footer() {
           
           {/* Brand Info Column */}
           <div className="space-y-4">
-            <div className="flex items-center gap-1.5 font-serif font-bold text-brand-navy tracking-widest text-[#000000]">
-              <Award className="w-5 h-5 text-brand-gold" />
-              <span>PRESTIGE ADVISORY</span>
+            <div className="font-serif text-lg text-brand-navy tracking-wide" style={{ fontWeight: 600 }}>
+              Constantine Nixdorff
             </div>
             <p className="font-sans text-xs text-gray-500 leading-relaxed">
-              Global strategy. Institutional precision. We serve as the core private architect for the sovereign financial legacy of high-net-worth individuals, corporate entities, and family offices.
+              Private wealth advisory and strategic portfolio governance for high-net-worth individuals, family offices, and corporate principals across Europe and beyond.
             </p>
           </div>
 
@@ -114,7 +113,7 @@ export default function Footer() {
         {/* Bottom copyright details */}
         <div className="border-t border-border-subtle pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="font-sans text-[10px] text-gray-400 capitalize">
-            © {new Date().getFullYear()} Prestige Advisory Group. All rights reserved. Registered under BaFin reference regulatory numbers.
+            © {new Date().getFullYear()} Constantine Nixdorff. All rights reserved. Registered under BaFin reference regulatory numbers.
           </p>
           <div className="flex gap-4">
             <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-brand-navy hover:bg-brand-navy hover:text-white transition-all">
