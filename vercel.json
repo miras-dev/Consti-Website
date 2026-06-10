@@ -2,10 +2,7 @@
   "version": 2,
   "functions": {
     "api/index.ts": {
-      "includeFiles": [
-        "leads.json",
-        "src/data/**"
-      ]
+      "includeFiles": "{leads.json,src/data/**}"
     }
   },
   "rewrites": [
