@@ -3,7 +3,6 @@ import path from "path";
 import OpenAI from "openai";
 import dotenv from "dotenv";
 import fs from "fs";
-import { PDFParse } from "pdf-parse";
 
 
 dotenv.config();
@@ -767,6 +766,7 @@ Keep your responses succinct, structured, and profoundly strategic. Do not write
 
     try {
       if (type === "application/pdf" || name.toLowerCase().endsWith(".pdf")) {
+        const { PDFParse } = await import("pdf-parse");
         const parser = new PDFParse(new Uint8Array(buffer));
         const parsed = await parser.getText();
         textContent = parsed.text || "";
