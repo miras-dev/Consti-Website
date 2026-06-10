@@ -214,7 +214,7 @@ export default function Hero({ onStartArchitect, onViewServices }: HeroProps) {
           {/* Right: Full-height portrait */}
           <div className="hidden lg:block relative">
             <img
-              src="/src/components/Hero.png"
+              src="/Hero.png"
               alt="Constantine Nixdorff"
               className="absolute inset-0 w-full h-full object-cover object-top"
             />
