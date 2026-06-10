@@ -1,14 +1,14 @@
 {
   "version": 2,
   "functions": {
-    "api/index.cjs": {
-      "includeFiles": "dist/server.cjs"
+    "api/index.ts": {
+      "includeFiles": "{server.ts,leads.json,src/data/**}"
     }
   },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.cjs"
+      "destination": "/api/index.ts"
     },
     {
       "source": "/((?!api/).*)",
