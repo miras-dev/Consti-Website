@@ -163,6 +163,45 @@ You MUST generate a structured JSON object complying with the schema rules. Ensu
     }
   });
 
+function copyRecursive(src: string, dest: string) {
+  const exists = fs.existsSync(src);
+  const stats = exists && fs.statSync(src);
+  const isDirectory = exists && stats.isDirectory();
+  if (isDirectory) {
+    if (!fs.existsSync(dest)) {
+      fs.mkdirSync(dest, { recursive: true });
+    }
+    fs.readdirSync(src).forEach((child) => {
+      copyRecursive(path.join(src, child), path.join(dest, child));
+    });
+  } else if (exists) {
+    fs.copyFileSync(src, dest);
+  }
+}
+
+function getWritablePath(relativePath: string): string {
+  if (process.env.VERCEL) {
+    const tmpPath = path.join("/tmp", relativePath);
+    if (!fs.existsSync(tmpPath)) {
+      const originalPath = path.join(process.cwd(), relativePath);
+      if (fs.existsSync(originalPath)) {
+        try {
+          copyRecursive(originalPath, tmpPath);
+        } catch (e) {
+          console.error(`Failed to copy ${relativePath} to /tmp:`, e);
+        }
+      } else {
+        const dir = path.dirname(tmpPath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+      }
+    }
+    return tmpPath;
+  }
+  return path.join(process.cwd(), relativePath);
+}
+
 function extractName(text: string): string | null {
   const myNameIs = text.match(/my name is\s+([a-zA-Z\s]+?)(?:\.|\s|$|and|my|your|phone|number|email)/i);
   if (myNameIs) return myNameIs[1].trim();
@@ -271,7 +310,7 @@ Keep your responses succinct, structured, and profoundly strategic. Do not write
         temperature: 0.7
       };
 
-      const configPath = path.join(process.cwd(), "src", "data", "chatbot_config.json");
+      const configPath = getWritablePath(path.join("src", "data", "chatbot_config.json"));
       if (fs.existsSync(configPath)) {
         try {
           config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
@@ -282,7 +321,7 @@ Keep your responses succinct, structured, and profoundly strategic. Do not write
 
       // 2. Simple keyword-matching RAG context lookup
       let retrievedContext = "";
-      const resourcesDir = path.join(process.cwd(), "src", "data", "resources");
+      const resourcesDir = getWritablePath(path.join("src", "data", "resources"));
       if (fs.existsSync(resourcesDir)) {
         const files = fs.readdirSync(resourcesDir).filter(f => f.endsWith(".txt"));
         const allParagraphs: { file: string; text: string }[] = [];
@@ -424,7 +463,7 @@ Once and ONLY once you have collected all four details, you may confirm the appo
             }
           } else {
             // All 4 fields are provided, save the lead!
-            const leadsPath = path.join(process.cwd(), "leads.json");
+            const leadsPath = getWritablePath("leads.json");
             let leads: any[] = [];
             if (fs.existsSync(leadsPath)) {
               try {
@@ -526,7 +565,7 @@ Once and ONLY once you have collected all four details, you may confirm the appo
         lead.notes && lead.notes.trim() !== "" && !lead.notes.toLowerCase().includes("unknown");
 
       if (hasAllRequiredInfo) {
-        const leadsPath = path.join(process.cwd(), "leads.json");
+        const leadsPath = getWritablePath("leads.json");
         let leads: any[] = [];
         if (fs.existsSync(leadsPath)) {
           try {
@@ -572,7 +611,7 @@ Once and ONLY once you have collected all four details, you may confirm the appo
 
   // Get Admin CRM Leads list
   app.get("/api/admin/leads", (req, res) => {
-    const leadsPath = path.join(process.cwd(), "leads.json");
+    const leadsPath = getWritablePath("leads.json");
     try {
       if (fs.existsSync(leadsPath)) {
         const raw = fs.readFileSync(leadsPath, "utf-8");
@@ -588,7 +627,7 @@ Once and ONLY once you have collected all four details, you may confirm the appo
   // Update Admin CRM Lead Status
   app.post("/api/admin/leads/status", (req, res) => {
     const { id, status } = req.body;
-    const leadsPath = path.join(process.cwd(), "leads.json");
+    const leadsPath = getWritablePath("leads.json");
     try {
       if (fs.existsSync(leadsPath)) {
         const leads = JSON.parse(fs.readFileSync(leadsPath, "utf-8"));
@@ -609,7 +648,7 @@ Once and ONLY once you have collected all four details, you may confirm the appo
   // Delete Admin CRM Lead
   app.delete("/api/admin/leads/:id", (req, res) => {
     const { id } = req.params;
-    const leadsPath = path.join(process.cwd(), "leads.json");
+    const leadsPath = getWritablePath("leads.json");
     try {
       if (fs.existsSync(leadsPath)) {
         let leads = JSON.parse(fs.readFileSync(leadsPath, "utf-8"));
@@ -635,7 +674,7 @@ Once and ONLY once you have collected all four details, you may confirm the appo
 
   // Get Chatbot Config
   app.get("/api/chatbot/config", (req, res) => {
-    const configPath = path.join(process.cwd(), "src", "data", "chatbot_config.json");
+    const configPath = getWritablePath(path.join("src", "data", "chatbot_config.json"));
     try {
       if (fs.existsSync(configPath)) {
         const raw = fs.readFileSync(configPath, "utf-8");
@@ -658,7 +697,7 @@ Keep your responses succinct, structured, and profoundly strategic. Do not write
   // Save Chatbot Config
   app.post("/api/chatbot/config", (req, res) => {
     const { instructions, model, temperature } = req.body;
-    const configPath = path.join(process.cwd(), "src", "data", "chatbot_config.json");
+    const configPath = getWritablePath(path.join("src", "data", "chatbot_config.json"));
     try {
       const config = { instructions, model, temperature: parseFloat(temperature) || 0.7 };
       fs.writeFileSync(configPath, JSON.stringify(config, null, 2), "utf-8");
@@ -671,7 +710,7 @@ Keep your responses succinct, structured, and profoundly strategic. Do not write
 
   // List Chatbot Resources
   app.get("/api/chatbot/resources", (req, res) => {
-    const resourcesDir = path.join(process.cwd(), "src", "data", "resources");
+    const resourcesDir = getWritablePath(path.join("src", "data", "resources"));
     try {
       if (!fs.existsSync(resourcesDir)) {
         return res.json([]);
@@ -701,7 +740,7 @@ Keep your responses succinct, structured, and profoundly strategic. Do not write
     if (!name || !data) {
       return res.status(400).json({ error: "Filename and file data are required" });
     }
-    const resourcesDir = path.join(process.cwd(), "src", "data", "resources");
+    const resourcesDir = getWritablePath(path.join("src", "data", "resources"));
     if (!fs.existsSync(resourcesDir)) {
       fs.mkdirSync(resourcesDir, { recursive: true });
     }
@@ -736,7 +775,7 @@ Keep your responses succinct, structured, and profoundly strategic. Do not write
   // Delete Chatbot Resource
   app.delete("/api/chatbot/resources/:name", (req, res) => {
     const { name } = req.params;
-    const resourcesDir = path.join(process.cwd(), "src", "data", "resources");
+    const resourcesDir = getWritablePath(path.join("src", "data", "resources"));
     const safeName = name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
     const txtName = safeName.endsWith(".txt") ? safeName : `${safeName}.txt`;
     const filePath = path.join(resourcesDir, txtName);
@@ -755,7 +794,7 @@ Keep your responses succinct, structured, and profoundly strategic. Do not write
 
   // Get Active Content
   app.get("/api/content", (req, res) => {
-    const filePath = path.join(process.cwd(), "src", "data", "site_content.json");
+    const filePath = getWritablePath(path.join("src", "data", "site_content.json"));
     try {
       if (fs.existsSync(filePath)) {
         const raw = fs.readFileSync(filePath, "utf-8");
@@ -775,8 +814,8 @@ Keep your responses succinct, structured, and profoundly strategic. Do not write
       return res.status(400).json({ error: "Content is required" });
     }
 
-    const contentPath = path.join(process.cwd(), "src", "data", "site_content.json");
-    const versionsPath = path.join(process.cwd(), "src", "data", "content_versions.json");
+    const contentPath = getWritablePath(path.join("src", "data", "site_content.json"));
+    const versionsPath = getWritablePath(path.join("src", "data", "content_versions.json"));
 
     try {
       // 1. Write to active site_content.json
@@ -813,7 +852,7 @@ Keep your responses succinct, structured, and profoundly strategic. Do not write
 
   // Get Version History List
   app.get("/api/content/versions", (req, res) => {
-    const versionsPath = path.join(process.cwd(), "src", "data", "content_versions.json");
+    const versionsPath = getWritablePath(path.join("src", "data", "content_versions.json"));
     try {
       if (fs.existsSync(versionsPath)) {
         const raw = fs.readFileSync(versionsPath, "utf-8");
@@ -841,8 +880,8 @@ Keep your responses succinct, structured, and profoundly strategic. Do not write
       return res.status(400).json({ error: "Version ID is required" });
     }
 
-    const contentPath = path.join(process.cwd(), "src", "data", "site_content.json");
-    const versionsPath = path.join(process.cwd(), "src", "data", "content_versions.json");
+    const contentPath = getWritablePath(path.join("src", "data", "site_content.json"));
+    const versionsPath = getWritablePath(path.join("src", "data", "content_versions.json"));
 
     try {
       if (!fs.existsSync(versionsPath)) {
