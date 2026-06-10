@@ -532,40 +532,19 @@ Once and ONLY once you have collected all four details, you may confirm the appo
         })),
       ];
 
+      // Append JSON format instruction to system message
+      if (formattedMessages.length > 0 && formattedMessages[0].role === "system") {
+        formattedMessages[0] = {
+          ...formattedMessages[0],
+          content: formattedMessages[0].content + `\n\nALWAYS respond with valid JSON in this exact format: {"text":"your reply here","extractedLead":{"name":"","email":"","phone":"","meetingDate":"","meetingTime":"","meetingType":"","notes":""},"hasLeadInfo":false}`
+        };
+      }
+
       const response = await ai.chat.completions.create({
         model: config.model || "gpt-4o-mini",
         messages: formattedMessages,
         temperature: config.temperature !== undefined ? config.temperature : 0.7,
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "chat_response",
-            strict: true,
-            schema: {
-              type: "object",
-              properties: {
-                text: { type: "string" },
-                extractedLead: {
-                  type: "object",
-                  properties: {
-                    name: { type: "string" },
-                    email: { type: "string" },
-                    phone: { type: "string" },
-                    meetingDate: { type: "string" },
-                    meetingTime: { type: "string" },
-                    meetingType: { type: "string" },
-                    notes: { type: "string" }
-                  },
-                  required: ["name", "email", "phone", "meetingDate", "meetingTime", "meetingType", "notes"],
-                  additionalProperties: false
-                },
-                hasLeadInfo: { type: "boolean" }
-              },
-              required: ["text", "extractedLead", "hasLeadInfo"],
-              additionalProperties: false
-            }
-          }
-        }
+        response_format: { type: "json_object" }
       });
 
       const rawContent = response.choices[0].message?.content || "{}";
@@ -621,12 +600,13 @@ Once and ONLY once you have collected all four details, you may confirm the appo
 
       res.json({ text: responseText });
     } catch (error: any) {
-      console.error("[/api/chat] Error:", error?.message || error, error?.status, error?.code);
+      const msg = error?.message || String(error);
+      const status = error?.status || error?.response?.status;
+      const code = error?.code;
+      console.error("[/api/chat] Error:", msg, "status:", status, "code:", code);
       res.status(500).json({
         error: "Strategic transmission was temporarily interrupted.",
-        debug: error?.message || String(error),
-        status: error?.status,
-        code: error?.code
+        debug: `${msg} (status=${status}, code=${code})`
       });
     }
   });
