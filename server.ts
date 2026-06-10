@@ -316,6 +316,7 @@ function extractPurpose(text: string): string | null {
     try {
       const { messages = [], context = {}, lang = "en" } = req.body;
 
+
       // 1. Load active settings config
       let config = {
         instructions: `You are Senior Wealth Director Markus von Preußen, a seasoned family office architect and leading partner at Prestige Advisory.
@@ -620,8 +621,13 @@ Once and ONLY once you have collected all four details, you may confirm the appo
 
       res.json({ text: responseText });
     } catch (error: any) {
-      console.error("OpenAI chat API error:", error);
-      res.status(500).json({ error: "Strategic transmission was temporarily interrupted." });
+      console.error("[/api/chat] Error:", error?.message || error, error?.status, error?.code);
+      res.status(500).json({
+        error: "Strategic transmission was temporarily interrupted.",
+        debug: error?.message || String(error),
+        status: error?.status,
+        code: error?.code
+      });
     }
   });
 

@@ -10,6 +10,9 @@ import Footer from "./components/Footer";
 import AdminLogin from "./components/AdminLogin";
 import AdminDashboard from "./components/AdminDashboard";
 import ChatWidget from "./components/ChatWidget";
+import CookieBanner from "./components/CookieBanner";
+import ImpressumPage from "./components/ImpressumPage";
+import PrivacyPolicyPage from "./components/PrivacyPolicyPage";
 import { Mail, ShieldCheck } from "lucide-react";
 import { useLanguage } from "./contexts/LanguageContext";
 
@@ -18,9 +21,8 @@ export default function App() {
     if (window.location.pathname === "/admin") {
       return "admin";
     }
-    // Simple deep-link support
     const p = window.location.pathname.replace("/", "");
-    if (["expertise", "architect", "directory", "contact"].includes(p)) {
+    if (["expertise", "architect", "directory", "contact", "impressum", "privacy"].includes(p)) {
       return p;
     }
     return "home";
@@ -38,7 +40,7 @@ export default function App() {
         setActiveTab("admin");
       } else {
         const p = window.location.pathname.replace("/", "");
-        if (["expertise", "architect", "directory", "contact"].includes(p)) {
+        if (["expertise", "architect", "directory", "contact", "impressum", "privacy"].includes(p)) {
           setActiveTab(p);
         } else {
           setActiveTab("home");
@@ -60,6 +62,11 @@ export default function App() {
     window.history.pushState({}, "", path);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  // Expose navigation for CookieBanner (outside React tree)
+  useEffect(() => {
+    (window as any).__cnNavigate = handleNavigation;
+  }, []);
 
   const handleAdminLogin = (token: string) => {
     sessionStorage.setItem("prestige_admin_token", token);
@@ -148,6 +155,9 @@ export default function App() {
           <ContactPage />
         )}
 
+        {activeTab === "impressum" && <ImpressumPage />}
+        {activeTab === "privacy" && <PrivacyPolicyPage />}
+
         {activeTab === "admin" && (
           !adminToken ? (
             <AdminLogin onLoginSuccess={handleAdminLogin} />
@@ -160,6 +170,7 @@ export default function App() {
 
       {activeTab !== "admin" ? <Footer /> : null}
       {activeTab !== "admin" ? <ChatWidget /> : null}
+      {activeTab !== "admin" ? <CookieBanner /> : null}
 
       {/* Mobile sticky contact CTA */}
       {activeTab !== "admin" && (
