@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { MessageSquare, Send, X, Landmark, ShieldCheck, RefreshCw } from "lucide-react";
+import { MessageSquare, Send, X, RefreshCw } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 
 interface ChatMessage {
@@ -23,8 +23,8 @@ export default function ChatWidget() {
     
     const greetingText =
       language === "de"
-        ? "Guten Tag, ich bin Markus von Preußen, Senior-Vermögensberater bei Prestige Advisory. Wie kann ich Ihnen heute bei Ihrer Finanzplanung, Steuerstrukturierung oder Indexallokation behilflich sein?"
-        : "Hello, I am Markus von Preußen, Senior Wealth Director at Prestige Advisory. How may I assist you today regarding our financial planning, tax structuring, or index compounding services?";
+        ? "Hallo! Ich bin Constantines Assistent. Wie kann ich Ihnen heute helfen?"
+        : "Hi there! I'm Constantine's Assistant. How can I help you today?";
 
     setChatLog([
       {
@@ -75,7 +75,10 @@ export default function ChatWidget() {
         })
       });
 
-      if (!response.ok) throw new Error("Advisor network error.");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.debug || errData.error || `HTTP ${response.status}`);
+      }
 
       const data = await response.json();
 
@@ -89,13 +92,13 @@ export default function ChatWidget() {
         }
       ]);
     } catch (err: any) {
-      console.error(err);
+      console.error("[ChatWidget] error:", err?.message);
       setChatLog((prev) => [
         ...prev,
         {
           id: Math.random().toString(),
           sender: "advisor",
-          text: t("chat.mockFallback"),
+          text: `[Debug] ${err?.message || "Unknown error"} — please share this with support.`,
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
         }
       ]);
@@ -108,31 +111,31 @@ export default function ChatWidget() {
     <div className="fixed bottom-20 right-6 z-50 flex flex-col items-end font-sans">
       {/* Floating Chat Box Window */}
       {isOpen && (
-        <div className="w-96 h-[480px] bg-white border border-gray-200 rounded-xl shadow-2xl flex flex-col overflow-hidden mb-4 animate-fadeIn">
+        <div className="w-96 h-[80vh] bg-[#0f1623] border border-brand-gold/20 rounded-xl shadow-2xl flex flex-col overflow-hidden mb-4 animate-fadeIn">
           {/* Header */}
-          <div className="bg-brand-navy text-white p-4 flex items-center justify-between border-b border-white/5 shadow-md shrink-0">
+          <div className="bg-[#0f1623] text-white p-4 flex items-center justify-between border-b border-white/10 shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full border border-brand-gold bg-brand-gold/10 flex items-center justify-center shrink-0">
-                <span className="font-serif font-extrabold text-brand-gold text-xs">MP</span>
+              <div className="w-9 h-9 rounded-full border border-brand-gold/50 bg-brand-gold/10 flex items-center justify-center shrink-0">
+                <MessageSquare className="w-4 h-4 text-brand-gold" />
               </div>
               <div className="text-left">
-                <h5 className="font-serif text-xs font-bold text-brand-gold">{t("chat.seniorPartner")}</h5>
-                <div className="flex items-center gap-1 text-[8px] text-emerald-400 font-bold uppercase tracking-wider">
-                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping shrink-0" />
-                  <span>{t("chat.securedLine")}</span>
+                <h5 className="text-sm font-semibold text-white">{language === "de" ? "Constantines Assistent" : "Constantine's Assistant"}</h5>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full shrink-0" />
+                  <span className="text-[10px] text-gray-400">{language === "de" ? "Online" : "Online"}</span>
                 </div>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-gray-400 hover:text-white p-1 rounded transition-colors cursor-pointer"
+              className="text-gray-500 hover:text-white p-1 rounded transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 p-4 bg-[#f8fafc] overflow-y-auto space-y-3.5 flex flex-col scrollbar-thin">
+          <div className="flex-1 p-4 bg-[#151d2e] overflow-y-auto space-y-3.5 flex flex-col scrollbar-thin">
             {chatLog.map((msg) => {
               const isUser = msg.sender === "user";
               return (
@@ -142,12 +145,12 @@ export default function ChatWidget() {
                     isUser ? "self-end items-end" : "self-start items-start"
                   }`}
                 >
-                  <span className="text-[8px] text-gray-400 mb-0.5 px-1">{msg.timestamp}</span>
+                  <span className="text-[8px] text-gray-500 mb-0.5 px-1">{msg.timestamp}</span>
                   <div
-                    className={`p-3 rounded text-xs leading-relaxed text-left whitespace-pre-line shadow-xs ${
+                    className={`p-3 rounded-lg text-xs leading-relaxed text-left whitespace-pre-line ${
                       isUser
-                        ? "bg-brand-navy text-white rounded-br-none"
-                        : "bg-white text-gray-700 border border-gray-100 rounded-bl-none"
+                        ? "bg-brand-gold text-brand-navy font-medium rounded-br-none"
+                        : "bg-[#1e2a3e] text-gray-200 rounded-bl-none"
                     }`}
                   >
                     {msg.text}
@@ -156,37 +159,38 @@ export default function ChatWidget() {
               );
             })}
             {chatLoading && (
-              <div className="self-start text-[10px] text-gray-400 italic flex items-center gap-1.5 px-1">
+              <div className="self-start text-[10px] text-gray-500 italic flex items-center gap-1.5 px-1">
                 <RefreshCw className="w-3 h-3 animate-spin text-brand-gold" />
-                <span>{t("chat.loadingStatus")}</span>
+                <span>{language === "de" ? "Schreibt..." : "Typing..."}</span>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
           {/* Input Form */}
-          <form onSubmit={handleSendMessage} className="p-3 bg-white border-t flex gap-2 shrink-0">
+          <form onSubmit={handleSendMessage} className="p-3 bg-[#0f1623] border-t border-white/10 flex gap-2 shrink-0">
             <input
               type="text"
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
-              placeholder={t("chat.inputPlaceholder")}
-              className="flex-1 border border-gray-200 px-3.5 py-2.5 rounded-lg text-xs outline-none focus:border-brand-navy bg-gray-50 text-gray-700"
+              placeholder={language === "de" ? "Stellen Sie eine Frage..." : "Ask a question..."}
+              className="flex-1 border border-white/10 px-3.5 py-2.5 rounded-lg text-xs outline-none focus:border-brand-gold/50 bg-[#151d2e] text-gray-200 placeholder-gray-500"
               disabled={chatLoading}
             />
             <button
               type="submit"
-              className="bg-brand-navy hover:bg-brand-navy-light text-white p-2.5 rounded-lg flex items-center justify-center transition-all disabled:opacity-50 cursor-pointer shadow-sm"
+              className="bg-brand-gold hover:brightness-110 text-brand-navy p-2.5 rounded-lg flex items-center justify-center transition-all disabled:opacity-50 cursor-pointer"
               disabled={chatLoading}
             >
-              <Send className="w-4 h-4 text-brand-gold" />
+              <Send className="w-4 h-4" />
             </button>
           </form>
 
-          {/* Footer Audited Note */}
-          <div className="bg-gray-50 border-t border-gray-100 py-1.5 px-3 flex items-center justify-center gap-1 shrink-0">
-            <ShieldCheck className="w-3 h-3 text-brand-gold" />
-            <span className="text-[8px] text-gray-400 uppercase tracking-widest font-semibold">BaFin Compliance Secure</span>
+          {/* Automated assistant disclosure */}
+          <div className="bg-[#0f1623] border-t border-white/5 py-1.5 px-3 text-center shrink-0">
+            <span className="text-[9px] text-gray-600">
+              {language === "de" ? "🤖 Automatisierter Assistent – kein Mensch" : "🤖 Automated assistant – not a human"}
+            </span>
           </div>
         </div>
       )}

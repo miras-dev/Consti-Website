@@ -7,6 +7,11 @@ export default function Footer() {
   const [newsInput, setNewsInput] = useState<string>("");
   const [subscribed, setSubscribed] = useState<boolean>(false);
 
+  const navigate = (page: string) => {
+    const nav = (window as any).__cnNavigate;
+    if (nav) nav(page);
+  };
+
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newsInput.trim()) return;
@@ -103,8 +108,8 @@ export default function Footer() {
           <div className="space-y-4">
             <h5 className="font-sans text-[11px] font-bold uppercase tracking-widest text-brand-navy">{t("footer.securedPortals")}</h5>
             <ul className="space-y-2.5 text-xs text-gray-500">
-              <li><button className="hover:text-brand-gold transition-colors block text-left">{t("footer.privacy")}</button></li>
-              <li><button className="hover:text-brand-gold transition-colors block text-left">{t("footer.terms")}</button></li>
+              <li><button onClick={() => navigate("privacy")} className="hover:text-brand-gold transition-colors block text-left">{t("footer.privacy")}</button></li>
+              <li><button onClick={() => navigate("impressum")} className="hover:text-brand-gold transition-colors block text-left">Impressum</button></li>
               <li><button className="hover:text-brand-gold transition-colors block text-left">{t("footer.esg")}</button></li>
               <li><button className="hover:text-brand-gold transition-colors block text-left">{t("footer.registry")}</button></li>
             </ul>
