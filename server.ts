@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 import OpenAI from "openai";
 import dotenv from "dotenv";
 import fs from "fs";
@@ -21,11 +20,8 @@ function getOpenAIClient(): OpenAI {
   return openaiClient;
 }
 
-async function startServer() {
-  const app = express();
-  const PORT = parseInt(process.env.PORT || "3001");
-
-  app.use(express.json());
+const app = express();
+app.use(express.json());
 
   // API Route: Client Profile Strategic Analysis
   app.post("/api/advice", async (req, res) => {
@@ -883,25 +879,31 @@ Keep your responses succinct, structured, and profoundly strategic. Do not write
   });
 
   // Serve static UI / Integrate Vite dev server
-  if (process.env.NODE_ENV !== "production") {
+  async function initLocalServer() {
+    const PORT = parseInt(process.env.PORT || "3001");
+    if (process.env.NODE_ENV !== "production") {
+      const { createServer: createViteServer } = await import("vite");
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: "spa",
+      });
+      app.use(vite.middlewares);
+    } else {
+      const distPath = path.join(process.cwd(), "dist");
+      app.use(express.static(distPath));
+      app.get("*", (req, res) => {
+        res.sendFile(path.join(distPath, "index.html"));
+      });
+    }
 
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Prestige Advisory portal online at http://0.0.0.0:${PORT}`);
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Prestige Advisory portal online at http://0.0.0.0:${PORT}`);
-  });
-}
+  if (!process.env.VERCEL) {
+    initLocalServer();
+  }
 
 // Highly realistic mock generator to serve as fallback when API key is unconfigured
 function getMockAdviceReport(
@@ -1078,4 +1080,4 @@ function getMockAdviceReport(
   };
 }
 
-startServer();
+export default app;
