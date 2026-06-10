@@ -4,7 +4,7 @@ let app: any;
 let loadError: any;
 
 try {
-  app = (await import('../server')).default;
+  app = (await import('../server.ts')).default;
 } catch (e) {
   loadError = e;
   console.error('[api/index] Failed to load server module:', e);
