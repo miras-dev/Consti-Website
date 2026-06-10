@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Mail, Phone, MapPin, Landmark } from "lucide-react";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export default function Footer() {
+  const { t } = useLanguage();
   const [newsInput, setNewsInput] = useState<string>("");
   const [subscribed, setSubscribed] = useState<boolean>(false);
 
@@ -19,9 +21,9 @@ export default function Footer() {
         {/* Newsletter Section */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center bg-background-soft p-6 md:p-8 rounded border border-gray-100">
           <div className="md:col-span-7 space-y-2">
-            <h4 className="font-serif text-lg md:text-xl font-bold text-brand-navy">The Weekly Brief</h4>
+            <h4 className="font-serif text-lg md:text-xl font-bold text-brand-navy">{t("footer.weeklyBrief")}</h4>
             <p className="font-sans text-xs md:text-sm text-gray-500 max-w-xl">
-              Sophisticated market analytics, structural tax shielding adjustments, and regulatory compliance updates delivered directly to your workstation.
+              {t("footer.briefDesc")}
             </p>
           </div>
           <div className="md:col-span-5 w-full">
@@ -31,7 +33,7 @@ export default function Footer() {
                   type="email" 
                   value={newsInput}
                   onChange={(e) => setNewsInput(e.target.value)}
-                  placeholder="Corporate Email Address"
+                  placeholder={t("footer.emailPlaceholder")}
                   className="bg-white border border-gray-200 px-4 py-3 rounded text-xs flex-1 outline-none focus:border-brand-navy"
                   required
                 />
@@ -39,12 +41,12 @@ export default function Footer() {
                   type="submit"
                   className="bg-brand-navy hover:bg-brand-navy-light text-white font-sans text-xs font-bold uppercase tracking-wider px-5 py-3 rounded transform active:scale-95 transition-transform shrink-0"
                 >
-                  Subscribe
+                  {t("footer.subscribe")}
                 </button>
               </form>
             ) : (
               <div className="bg-brand-gold-light border border-brand-gold/20 p-3 rounded text-center text-xs text-brand-navy font-bold">
-                ✓ Strategic Subscription Authorized.
+                {t("footer.subscribed")}
               </div>
             )}
           </div>
@@ -59,52 +61,52 @@ export default function Footer() {
               Constantine Nixdorff
             </div>
             <p className="font-sans text-xs text-gray-500 leading-relaxed">
-              Private wealth advisory and strategic portfolio governance for high-net-worth individuals, family offices, and corporate principals across Europe and beyond.
+              {t("footer.brandDesc")}
             </p>
           </div>
 
           {/* Network Column */}
           <div className="space-y-4">
-            <h5 className="font-sans text-[11px] font-bold uppercase tracking-widest text-brand-navy">Global Network</h5>
+            <h5 className="font-sans text-[11px] font-bold uppercase tracking-widest text-brand-navy">{t("footer.globalNetwork")}</h5>
             <ul className="space-y-2.5 text-xs text-gray-500">
               <li className="flex items-center gap-2">
                 <MapPin className="w-3.5 h-3.5 text-brand-gold" />
-                <span>London Branch (Mayfair)</span>
+                <span>{t("footer.london")}</span>
               </li>
               <li className="flex items-center gap-2">
                 <MapPin className="w-3.5 h-3.5 text-brand-gold" />
-                <span>Berlin Capital Hub (Mitte)</span>
+                <span>{t("footer.berlin")}</span>
               </li>
               <li className="flex items-center gap-2">
                 <MapPin className="w-3.5 h-3.5 text-brand-gold" />
-                <span>Zurich Head Office (Bahnhofstrasse)</span>
+                <span>{t("footer.zurich")}</span>
               </li>
               <li className="flex items-center gap-2">
                 <MapPin className="w-3.5 h-3.5 text-brand-gold" />
-                <span>New York Office (Wall Street)</span>
+                <span>{t("footer.newyork")}</span>
               </li>
             </ul>
           </div>
 
           {/* Governance Column */}
           <div className="space-y-4">
-            <h5 className="font-sans text-[11px] font-bold uppercase tracking-widest text-brand-navy">Governance</h5>
+            <h5 className="font-sans text-[11px] font-bold uppercase tracking-widest text-brand-navy">{t("footer.governance")}</h5>
             <ul className="space-y-2.5 text-xs text-gray-500">
-              <li><button className="hover:text-brand-gold transition-colors block">BaFin Audit Standards</button></li>
-              <li><button className="hover:text-brand-gold transition-colors block">SFDR ESG Regulations</button></li>
-              <li><button className="hover:text-brand-gold transition-colors block">Ethics & Compliance Code</button></li>
-              <li><button className="hover:text-brand-gold transition-colors block">MIFID II Protocol Alignment</button></li>
+              <li><button className="hover:text-brand-gold transition-colors block text-left">{t("footer.bafinAudit")}</button></li>
+              <li><button className="hover:text-brand-gold transition-colors block text-left">{t("footer.sfdr")}</button></li>
+              <li><button className="hover:text-brand-gold transition-colors block text-left">{t("footer.ethics")}</button></li>
+              <li><button className="hover:text-brand-gold transition-colors block text-left">{t("footer.mifid")}</button></li>
             </ul>
           </div>
 
           {/* Legal Compliance Column */}
           <div className="space-y-4">
-            <h5 className="font-sans text-[11px] font-bold uppercase tracking-widest text-brand-navy">Secured Portals</h5>
+            <h5 className="font-sans text-[11px] font-bold uppercase tracking-widest text-brand-navy">{t("footer.securedPortals")}</h5>
             <ul className="space-y-2.5 text-xs text-gray-500">
-              <li><button className="hover:text-brand-gold transition-colors block">Privacy Policy</button></li>
-              <li><button className="hover:text-brand-gold transition-colors block">Terms of Service</button></li>
-              <li><button className="hover:text-brand-gold transition-colors block">Corporate ESG Disclosures</button></li>
-              <li><button className="hover:text-brand-gold transition-colors block">BaFin Registered Registry</button></li>
+              <li><button className="hover:text-brand-gold transition-colors block text-left">{t("footer.privacy")}</button></li>
+              <li><button className="hover:text-brand-gold transition-colors block text-left">{t("footer.terms")}</button></li>
+              <li><button className="hover:text-brand-gold transition-colors block text-left">{t("footer.esg")}</button></li>
+              <li><button className="hover:text-brand-gold transition-colors block text-left">{t("footer.registry")}</button></li>
             </ul>
           </div>
 
@@ -112,8 +114,8 @@ export default function Footer() {
 
         {/* Bottom copyright details */}
         <div className="border-t border-border-subtle pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="font-sans text-[10px] text-gray-400 capitalize">
-            © {new Date().getFullYear()} Constantine Nixdorff. All rights reserved. Registered under BaFin reference regulatory numbers.
+          <p className="font-sans text-[10px] text-gray-400">
+            © {new Date().getFullYear()} {t("footer.copyright")}
           </p>
           <div className="flex gap-4">
             <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-brand-navy hover:bg-brand-navy hover:text-white transition-all">

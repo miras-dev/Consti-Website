@@ -3,6 +3,7 @@ import {
   Building, ShieldAlert, FileText, Send, User, ChevronRight, Landmark, RefreshCw, Cpu, CheckCircle, Sparkles, MessageSquare, Compass, BarChart3, Receipt, Calendar, ArrowRight, UserCheck
 } from "lucide-react";
 import { AdviceReport, ChatMessage } from "../types";
+import { useLanguage } from "../contexts/LanguageContext";
 
 interface WealthArchitectProps {
   initialSpecialty?: string;
@@ -10,17 +11,18 @@ interface WealthArchitectProps {
 }
 
 export default function WealthArchitect({ initialSpecialty, setActiveTab }: WealthArchitectProps) {
+  const { t, language } = useLanguage();
   const [step, setStep] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
-  const [loadingStep, setLoadingStep] = useState<string>("Initializing client profiling...");
+  const [loadingStep, setLoadingStep] = useState<string>(t("architect.initializing"));
   
   // Form states
   const [clientName, setClientName] = useState<string>("");
   const [clientEmail, setClientEmail] = useState<string>("");
   const [assets, setAssets] = useState<number>(1500000);
-  const [riskTolerance, setRiskTolerance] = useState<string>("Moderate Adaptive");
-  const [goal, setGoal] = useState<string>("Wealth Preservation & Generational Transfer");
-  const [regionalContext, setRegionalContext] = useState<string>("Germany (BaFin Rules)");
+  const [riskTolerance, setRiskTolerance] = useState<string>("Adaptive Moderate Yield Optimized");
+  const [goal, setGoal] = useState<string>("Strict Capital Wealth Preservation");
+  const [regionalContext, setRegionalContext] = useState<string>("Germany (BaFin Protected Assets)");
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>(
     initialSpecialty ? [initialSpecialty] : ["Financial Planning", "Tax Optimization"]
   );
@@ -45,6 +47,18 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
     "Sustainable Investing"
   ];
 
+  const keyMap: Record<string, string> = {
+    "Financial Planning": "module.planning.title",
+    "Investment & ETFs": "module.investment.title",
+    "Retirement Planning": "module.retirement.title",
+    "Insurance Analysis": "module.insurance.title",
+    "Career Coaching": "module.career.title",
+    "Tax Optimization": "module.tax.title",
+    "Salary Negotiation": "module.salary.title",
+    "Internationals in Germany": "module.international.title",
+    "Sustainable Investing": "module.sustainable.title",
+  };
+
   const toggleSpecialty = (spec: string) => {
     if (selectedSpecialties.includes(spec)) {
       setSelectedSpecialties(selectedSpecialties.filter(s => s !== spec));
@@ -56,14 +70,19 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
   const executeAnalysis = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clientName) {
-      alert("Please specify client name to initialize legacy validation protocols.");
+      alert(language === "de" ? "Bitte geben Sie den Kundennamen an, um die Legacy-Validierungsprotokolle zu initiieren." : "Please specify client name to initialize legacy validation protocols.");
       return;
     }
     
     setLoading(true);
     
-    // Staggered status messages to elevate the private banking feel
-    const steps = [
+    const steps = language === "de" ? [
+      "Sichere Übertragungsleitung wird aufgebaut...",
+      "Kapitalpoolindizes werden strukturiert...",
+      "Europäische Steuerschilde & BaFin-Compliance-Raster werden bewertet...",
+      "SFDR Artikel 9 ESG-Mandate mit hoher Überzeugung werden ausgerichtet...",
+      "Abschließender maßgeschneiderter strategischer Architekturbericht wird zusammengestellt..."
+    ] : [
       "Establishing secure transmission line...",
       "Structuring capital pool indices...",
       "Evaluating European tax shields & BaFin compliance grids...",
@@ -72,6 +91,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
     ];
 
     let currentStep = 0;
+    setLoadingStep(steps[0]);
     const interval = setInterval(() => {
       if (currentStep < steps.length - 1) {
         currentStep++;
@@ -90,7 +110,8 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
           goal,
           timeHorizon: 15,
           regionalContext,
-          specialtiesSelected: selectedSpecialties
+          specialtiesSelected: selectedSpecialties,
+          lang: language // Pass current active language
         })
       });
 
@@ -107,7 +128,11 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
         {
           id: "welcome",
           sender: "advisor",
-          text: `Welcome, ${clientName}. I have carefully audited your wealth profile. Restructuring €${assets.toLocaleString()} requires absolute sovereign dedication. Based on your target goal of "${goal}" under ${regionalContext} jurisdiction, our recommended core global allocation and strategic structural tax shields represent the absolute state of the art in capital preservation dynamics. Please tell me, what primary assets or timeline milestones would you like to examine first?`,
+          text: language === "de" 
+            ? `Willkommen, ${clientName}. Ich habe Ihr Vermögensprofil sorgfältig geprüft. Die Neustrukturierung von €${assets.toLocaleString()} erfordert absolute Hingabe. Basierend auf Ihrem Ziel "${t(
+                "architect.objOption" + (goal === "Strict Capital Wealth Preservation" ? "1" : goal === "Aggressive Compound Alternative Accumulation" ? "2" : goal === "Generational Legacy Estate Sinking Shield" ? "3" : "4")
+              )}" unter der Gerichtsbarkeit von ${regionalContext} stellen unsere vorgeschlagene globale Allokation und die strategischen Steuerschilde den absolut neuesten Stand der Kapitalsicherung dar. Bitte sagen Sie mir, welche Anlageklassen oder Meilensteine Sie zuerst prüfen möchten?`
+            : `Welcome, ${clientName}. I have carefully audited your wealth profile. Restructuring €${assets.toLocaleString()} requires absolute sovereign dedication. Based on your target goal of "${goal}" under ${regionalContext} jurisdiction, our recommended core global allocation and strategic structural tax shields represent the absolute state of the art in capital preservation dynamics. Please tell me, what primary assets or timeline milestones would you like to examine first?`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);
@@ -115,7 +140,9 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
     } catch (error) {
       console.error(error);
       clearInterval(interval);
-      alert("We encountered a minor communication lag with the BaFin validation server. Retrying secure load...");
+      alert(language === "de" 
+        ? "Wir haben eine geringfügige Kommunikationsverzögerung mit dem BaFin-Validierungsserver festgestellt. Sicherer Ladevorgang wird wiederholt..." 
+        : "We encountered a minor communication lag with the BaFin validation server. Retrying secure load...");
     } finally {
       setLoading(false);
     }
@@ -148,8 +175,9 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
             assets,
             goal,
             riskTolerance,
-            specialty: selectedSpecialties.join(", ")
-          }
+            specialty: selectedSpecialties.map(s => t(keyMap[s] || s)).join(", ")
+          },
+          lang: language // Pass active language context to chat model
         })
       });
 
@@ -170,7 +198,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
       setChatLog(prev => [...prev, {
         id: Math.random().toString(),
         sender: "advisor",
-        text: "My apologies, the transmission line experienced a temporary encryption verification refresh. Let us continue our consultation. Please repeat your question regarding the allocated portfolio asset classes.",
+        text: t("chat.mockFallback"),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }]);
     } finally {
@@ -192,7 +220,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
         <div className="min-h-[450px] flex flex-col items-center justify-center space-y-6 text-center animate-pulse" id="loading-overlay">
           <div className="w-16 h-16 rounded-full border-2 border-brand-gold border-t-brand-navy animate-spin" />
           <div className="space-y-2">
-            <h3 className="font-serif text-xl font-bold text-brand-navy">Prestige Engine Active</h3>
+            <h3 className="font-serif text-xl font-bold text-brand-navy">{t("architect.loadingTitle")}</h3>
             <p className="font-sans text-xs text-brand-gold uppercase tracking-widest font-semibold">{loadingStep}</p>
           </div>
         </div>
@@ -202,15 +230,15 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
       {!loading && step === 1 && (
         <div className="bg-white border border-border-subtle p-8 rounded shadow-sm space-y-6 animate-fadeIn" id="wizard-step-1">
           <div className="space-y-2 text-center border-b border-gray-100 pb-5">
-            <span className="font-sans text-[11px] font-bold uppercase tracking-[0.2em] text-brand-gold">Step 1 of 3</span>
-            <h2 className="font-serif text-2xl font-bold text-brand-navy">Sovereign Onboarding & Jurisdiction Setup</h2>
-            <p className="font-sans text-xs text-gray-500">Provide legal identification credentials to map appropriate fiscal jurisdictions.</p>
+            <span className="font-sans text-[11px] font-bold uppercase tracking-[0.2em] text-brand-gold">{t("architect.step1")}</span>
+            <h2 className="font-serif text-2xl font-bold text-brand-navy">{t("architect.setupTitle")}</h2>
+            <p className="font-sans text-xs text-gray-500">{t("architect.setupDesc")}</p>
           </div>
 
           <div className="space-y-4 text-left">
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-                Full Title & Legal Name
+                {t("architect.nameLabel")}
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
@@ -218,7 +246,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
                   type="text" 
                   value={clientName} 
                   onChange={(e) => setClientName(e.target.value)}
-                  placeholder="e.g., Dr. Roland von Preußen"
+                  placeholder={t("architect.namePlaceholder")}
                   className="w-full bg-background-soft border border-gray-200 pl-10 pr-4 py-3 rounded text-sm outline-none focus:border-brand-navy text-brand-navy font-semibold"
                   required
                 />
@@ -227,30 +255,30 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
 
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-                Corporate Email Address
+                {t("architect.emailLabel")}
               </label>
               <input 
                 type="email" 
                 value={clientEmail} 
                 onChange={(e) => setClientEmail(e.target.value)}
-                placeholder="e.g., roland@preussen-holdings.de"
+                placeholder={t("architect.emailPlaceholder")}
                 className="w-full bg-background-soft border border-gray-200 px-4 py-3 rounded text-sm outline-none focus:border-brand-navy text-gray-600"
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-                Regulatory Jurisdiction Map
+                {t("architect.jurisdictionLabel")}
               </label>
               <select
                 value={regionalContext}
                 onChange={(e) => setRegionalContext(e.target.value)}
                 className="w-full bg-background-soft border border-gray-200 px-4 py-3 rounded text-sm outline-none focus:border-brand-navy font-medium text-brand-navy"
               >
-                <option value="Germany (BaFin Protected Assets)">Germany (Sondervermögen Shielding)</option>
-                <option value="Switzerland (FINMA Protected Portfolios)">Switzerland / Zurich (FINMA Offshore Guard)</option>
-                <option value="Luxembourg (CSSF Sovereign Mutual Support)">Luxembourg (CSSF Institutional Trust Structure)</option>
-                <option value="Global Offshore Alignment">United Kingdom & Global Cross-Border Trusts</option>
+                <option value="Germany (BaFin Protected Assets)">{t("architect.jurOption1")}</option>
+                <option value="Switzerland (FINMA Protected Portfolios)">{t("architect.jurOption2")}</option>
+                <option value="Luxembourg (CSSF Sovereign Mutual Support)">{t("architect.jurOption3")}</option>
+                <option value="Global Offshore Alignment">{t("architect.jurOption4")}</option>
               </select>
             </div>
           </div>
@@ -260,7 +288,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
               onClick={() => setStep(2)}
               className="bg-brand-navy hover:bg-brand-navy-light text-white font-sans text-xs font-bold tracking-wider uppercase px-6 py-4 rounded flex items-center gap-2 transform active:scale-95 transition-all"
             >
-              Continue Setup
+              {t("architect.continueBtn")}
               <ChevronRight className="w-4 h-4 text-brand-gold" />
             </button>
           </div>
@@ -271,16 +299,16 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
       {!loading && step === 2 && (
         <div className="bg-white border border-border-subtle p-8 rounded shadow-sm space-y-6 animate-fadeIn" id="wizard-step-2">
           <div className="space-y-2 text-center border-b border-gray-100 pb-5">
-            <span className="font-sans text-[11px] font-bold uppercase tracking-[0.2em] text-brand-gold">Step 2 of 3</span>
-            <h2 className="font-serif text-2xl font-bold text-brand-navy">Capital Pool Structuring</h2>
-            <p className="font-sans text-xs text-gray-500">Determine total deployable net wealth levels and core strategic objectives.</p>
+            <span className="font-sans text-[11px] font-bold uppercase tracking-[0.2em] text-brand-gold">{t("architect.step2")}</span>
+            <h2 className="font-serif text-2xl font-bold text-brand-navy">{t("architect.capitalTitle")}</h2>
+            <p className="font-sans text-xs text-gray-500">{t("architect.capitalDesc")}</p>
           </div>
 
           <div className="space-y-6 text-left">
             <div>
               <div className="flex justify-between items-center mb-1">
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Investable Asset Value Range
+                  {t("architect.assetRangeLabel")}
                 </label>
                 <span className="text-sm font-serif font-bold text-brand-gold">
                   €{assets.toLocaleString()}
@@ -305,32 +333,32 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-                  Primary Capital Objective
+                  {t("architect.objectiveLabel")}
                 </label>
                 <select
                   value={goal}
                   onChange={(e) => setGoal(e.target.value)}
                   className="w-full bg-background-soft border border-gray-200 px-4 py-3 rounded text-sm outline-none focus:border-brand-navy font-medium text-brand-navy"
                 >
-                  <option value="Strict Capital Wealth Preservation">Sovereign Wealth Preservation</option>
-                  <option value="Aggressive Compound Alternative Accumulation">High-Conviction Tactical Growth</option>
-                  <option value="Generational Legacy Estate Sinking Shield">Inter-Generational Corporate Estate Strategy</option>
-                  <option value="Tax preferred ESG Compound Returns">Tax-Protected Sustainable Energy Yield</option>
+                  <option value="Strict Capital Wealth Preservation">{t("architect.objOption1")}</option>
+                  <option value="Aggressive Compound Alternative Accumulation">{t("architect.objOption2")}</option>
+                  <option value="Generational Legacy Estate Sinking Shield">{t("architect.objOption3")}</option>
+                  <option value="Tax preferred ESG Compound Returns">{t("architect.objOption4")}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-                  Adaptive Risk Appetite Class
+                  {t("architect.riskLabel")}
                 </label>
                 <select
                   value={riskTolerance}
                   onChange={(e) => setRiskTolerance(e.target.value)}
                   className="w-full bg-background-soft border border-gray-200 px-4 py-3 rounded text-sm outline-none focus:border-brand-navy font-medium text-brand-navy"
                 >
-                  <option value="Low Volatility Capital Defensive">Conservative Capital Guard</option>
-                  <option value="Adaptive Moderate Yield Optimized">Adaptive Moderate Structural Shield</option>
-                  <option value="High Conviction Tactical Active Apex">High-Conviction Alpha Accumulator</option>
+                  <option value="Low Volatility Capital Defensive">{t("architect.riskOption1")}</option>
+                  <option value="Adaptive Moderate Yield Optimized">{t("architect.riskOption2")}</option>
+                  <option value="High Conviction Tactical Active Apex">{t("architect.riskOption3")}</option>
                 </select>
               </div>
             </div>
@@ -341,13 +369,13 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
               onClick={() => setStep(1)}
               className="border border-gray-300 text-gray-500 hover:text-brand-navy py-3 px-6 rounded font-sans text-xs font-semibold uppercase transition-all"
             >
-              Previous Step
+              {t("architect.prevStep")}
             </button>
             <button
               onClick={() => setStep(3)}
               className="bg-brand-navy hover:bg-brand-navy-light text-white font-sans text-xs font-bold tracking-wider uppercase px-6 py-4 rounded flex items-center gap-2 transform active:scale-95 transition-all"
             >
-              Configure Advisory Specialty
+              {t("architect.configureFocus")}
               <ChevronRight className="w-4 h-4 text-brand-gold" />
             </button>
           </div>
@@ -358,16 +386,17 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
       {!loading && step === 3 && (
         <form onSubmit={executeAnalysis} className="bg-white border border-border-subtle p-8 rounded shadow-sm space-y-6 animate-fadeIn" id="wizard-step-3">
           <div className="space-y-2 text-center border-b border-gray-100 pb-5">
-            <span className="font-sans text-[11px] font-bold uppercase tracking-[0.2em] text-brand-gold">Step 3 of 3</span>
-            <h2 className="font-serif text-2xl font-bold text-brand-navy">Selective Advisory Focus Areas</h2>
-            <p className="font-sans text-xs text-gray-500">Tag particular focus areas to feed specific instructions to the Strategic Director.</p>
+            <span className="font-sans text-[11px] font-bold uppercase tracking-[0.2em] text-brand-gold">{t("architect.step3")}</span>
+            <h2 className="font-serif text-2xl font-bold text-brand-navy">{t("architect.focusTitle")}</h2>
+            <p className="font-sans text-xs text-gray-500">{t("architect.focusDesc")}</p>
           </div>
 
           <div className="space-y-4 text-left">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Advisory Lenses (Pick at least one):</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{t("architect.lensesLabel")}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {specialtiesOptions.map((spec) => {
                 const isSelected = selectedSpecialties.includes(spec);
+                const specLabel = t(keyMap[spec] || spec);
                 return (
                   <button
                     type="button"
@@ -379,7 +408,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
                         : "bg-background-soft text-gray-700 border-gray-200 hover:border-brand-navy"
                     }`}
                   >
-                    {spec}
+                    {specLabel}
                   </button>
                 );
               })}
@@ -392,7 +421,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
               onClick={() => setStep(2)}
               className="border border-gray-300 text-gray-500 hover:text-brand-navy py-3 px-6 rounded font-sans text-xs font-semibold uppercase transition-all"
             >
-              Previous Step
+              {t("architect.prevStep")}
             </button>
             <button
               type="submit"
@@ -400,7 +429,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
               id="submit-profiler-btn"
             >
               <Sparkles className="w-4 h-4 text-brand-gold" />
-              Build Bespoke Strategic Report
+              {t("architect.submitBtn")}
             </button>
           </div>
         </form>
@@ -414,14 +443,14 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
           <div className="flex justify-between items-center bg-brand-navy text-white px-5 py-4 rounded shadow-sm">
             <div className="flex items-center gap-2">
               <Landmark className="w-5 h-5 text-brand-gold" />
-              <span className="font-sans text-xs font-bold uppercase tracking-widest text-brand-gold">Bespoke Wealth Architecture Protocol</span>
+              <span className="font-sans text-xs font-bold uppercase tracking-widest text-brand-gold">{t("report.bannerProtocol")}</span>
             </div>
             <button
               onClick={resetArchitect}
               className="text-xs uppercase hover:text-brand-gold transition-colors font-sans flex items-center gap-2"
             >
               <RefreshCw className="w-3.5 h-3.5 animate-spin-slow" />
-              Reset Architect Form
+              {t("report.resetBtn")}
             </button>
           </div>
 
@@ -440,15 +469,15 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
                 <p className="font-sans text-[10px] text-gray-400 capitalize tracking-widest font-bold">ZURICH • LONDON • BERLIN • NEW YORK</p>
               </div>
               <div className="text-right text-xs space-y-1 font-sans font-medium text-gray-500">
-                <p>Date: {new Date().toLocaleDateString('en-GB')}</p>
-                <p>Audit Ref: #PA-{Math.floor(Math.random() * 900000 + 100000)}</p>
-                <p className="font-bold text-brand-gold text-[10px] uppercase">Highly Confidential</p>
+                <p>{t("report.date")} {new Date().toLocaleDateString(language === "de" ? "de-DE" : "en-GB")}</p>
+                <p>{t("report.auditRef")} #PA-{Math.floor(Math.random() * 900000 + 100000)}</p>
+                <p className="font-bold text-brand-gold text-[10px] uppercase">{t("report.confidential")}</p>
               </div>
             </div>
 
             {/* Formal Greeting Letter Block */}
             <div className="pt-8 space-y-4">
-              <p className="font-serif text-lg font-bold text-brand-navy text-left">Bespoke Strategic Architecture Proposal</p>
+              <p className="font-serif text-lg font-bold text-brand-navy text-left">{t("report.proposalTitle")}</p>
               <p className="font-sans text-sm text-gray-600 leading-relaxed text-left whitespace-pre-wrap">
                 {report.clientGreeting}
               </p>
@@ -458,7 +487,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
             <div className="pt-10 space-y-6">
               <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
                 <BarChart3 className="w-5 h-5 text-brand-gold" />
-                <h4 className="font-serif text-base font-bold text-brand-navy uppercase tracking-wider">Suggested Asset Allocation Alignment</h4>
+                <h4 className="font-serif text-base font-bold text-brand-navy uppercase tracking-wider">{t("report.allocationTitle")}</h4>
               </div>
 
               {/* Advanced Custom React Interactive allocation visualizer */}
@@ -486,7 +515,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
                             style={{ width: `${item.percentage}%` }}
                           />
                         </div>
-                        <p className="font-sans text-[11px] text-gray-400">Rational: {item.rationale}</p>
+                        <p className="font-sans text-[11px] text-gray-400">{language === "de" ? "Begründung" : "Rationale"}: {item.rationale}</p>
                       </div>
                     );
                   })}
@@ -494,13 +523,13 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
 
                 {/* Pie value box */}
                 <div className="md:col-span-5 bg-background-soft p-5 rounded border border-gray-100 space-y-4 text-center flex flex-col justify-center">
-                  <p className="font-sans text-xs uppercase tracking-widest text-brand-gold font-bold">Consolidated Wealth Pool</p>
+                  <p className="font-sans text-xs uppercase tracking-widest text-brand-gold font-bold">{t("report.consolidatedPool")}</p>
                   <div>
                     <p className="text-3xl font-serif font-black text-brand-navy">€{assets.toLocaleString()}</p>
-                    <p className="text-xs text-gray-400 mt-1">100% of investable funds reallocated.</p>
+                    <p className="text-xs text-gray-400 mt-1">{t("report.allReallocated")}</p>
                   </div>
                   <div className="w-full bg-white px-3 py-2 rounded border border-gray-100 text-xs text-gray-500 font-sans italic text-center">
-                    Weighted target preservation ESG index: <strong>92.8</strong>
+                    {t("report.esgIndex")}
                   </div>
                 </div>
 
@@ -511,7 +540,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
             <div className="pt-12 space-y-6">
               <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
                 <Compass className="w-5 h-5 text-brand-gold" />
-                <h4 className="font-serif text-base font-bold text-brand-navy uppercase tracking-wider text-left">Core Architectural Pillars</h4>
+                <h4 className="font-serif text-base font-bold text-brand-navy uppercase tracking-wider text-left">{t("report.pillarsTitle")}</h4>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -520,7 +549,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
                     <h5 className="font-serif text-sm font-bold text-brand-navy">{pillar.title}</h5>
                     <p className="font-sans text-xs text-gray-500 leading-relaxed">{pillar.description}</p>
                     <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-brand-gold uppercase tracking-wider">Actionable Deployment:</p>
+                      <p className="text-[10px] font-bold text-brand-gold uppercase tracking-wider">{t("report.actionableDeployment")}</p>
                       <ul className="space-y-1">
                         {pillar.steps.map((step, sIdx) => (
                           <li key={sIdx} className="font-sans text-xs text-gray-600 flex items-start gap-1.5">
@@ -539,7 +568,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
             <div className="pt-12 space-y-6">
               <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
                 <Receipt className="w-5 h-5 text-brand-gold" />
-                <h4 className="font-serif text-base font-bold text-brand-navy uppercase tracking-wider text-left">Tactical Regional Implementation Specs</h4>
+                <h4 className="font-serif text-base font-bold text-brand-navy uppercase tracking-wider text-left">{t("report.tacticsTitle")}</h4>
               </div>
 
               <div className="space-y-4">
@@ -560,7 +589,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
             <div className="pt-12 space-y-6">
               <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
                 <Calendar className="w-5 h-5 text-brand-gold" />
-                <h4 className="font-serif text-base font-bold text-brand-navy uppercase tracking-wider text-left">Phase Implementation Timeline</h4>
+                <h4 className="font-serif text-base font-bold text-brand-navy uppercase tracking-wider text-left">{t("report.timelineTitle")}</h4>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
@@ -603,13 +632,13 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
                   <span className="font-serif font-extrabold text-brand-navy text-sm">MP</span>
                 </div>
                 <div className="text-left">
-                  <h5 className="font-serif text-sm font-bold text-brand-gold">Senior Advisory Partner: Markus von Preußen</h5>
-                  <p className="font-sans text-[10px] text-gray-300">Active Secure Consultation Session • BaFin Regulated</p>
+                  <h5 className="font-serif text-sm font-bold text-brand-gold">{t("chat.seniorPartner")}</h5>
+                  <p className="font-sans text-[10px] text-gray-300">{t("chat.activeSession")}</p>
                 </div>
               </div>
               <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-emerald-400 font-bold uppercase font-sans">
                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
-                <span>SECURED CORE LINE</span>
+                <span>{t("chat.securedLine")}</span>
               </div>
             </div>
 
@@ -638,7 +667,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
               })}
               {chatLoading && (
                 <div className="self-start text-[11px] text-gray-400 italic">
-                  Markus is analyzing portfolio parameters...
+                  {t("chat.loadingStatus")}
                 </div>
               )}
             </div>
@@ -649,7 +678,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
                 type="text" 
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Ask Markus on tax sheltering, ETF model weights, or Bafin rules..."
+                placeholder={t("chat.inputPlaceholder")}
                 className="flex-1 border px-4 py-3 rounded text-xs outline-none focus:border-brand-navy"
                 disabled={chatLoading}
               />
@@ -658,7 +687,7 @@ export default function WealthArchitect({ initialSpecialty, setActiveTab }: Weal
                 className="bg-brand-navy hover:bg-brand-navy-light text-white font-sans text-xs font-bold tracking-wider uppercase px-5 py-3 rounded flex items-center gap-1.5"
                 disabled={chatLoading}
               >
-                <span>Transmit</span>
+                <span>{t("chat.transmit")}</span>
                 <Send className="w-3.5 h-3.5" />
               </button>
             </form>

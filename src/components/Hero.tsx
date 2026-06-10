@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ArrowRight, TrendingUp, Shield, BarChart3 } from "lucide-react";
+import { useLanguage } from "../contexts/LanguageContext";
 
 interface HeroProps {
   onStartArchitect: () => void;
@@ -15,7 +16,16 @@ const ALLOCATIONS = [
   { label: "Cash & Liquidity", pct: 7, color: "#c0c0c0" },
 ];
 
+const GERMAN_LABELS: Record<string, string> = {
+  "Global Equities": "Globale Aktien",
+  "Sovereign Bonds": "Staatsanleihen",
+  "Alternatives": "Alternative Anlagen",
+  "Real Estate": "Immobilien",
+  "Cash & Liquidity": "Barmittel & Liquidität",
+};
+
 function PortfolioRing() {
+  const { language, t } = useLanguage();
   const SIZE = 260;
   const CX = SIZE / 2;
   const CY = SIZE / 2;
@@ -23,11 +33,16 @@ function PortfolioRing() {
   const R_INNER = 72;
   const GAP = 2.5; // degrees between segments
 
+  const localizedAllocations = ALLOCATIONS.map(a => ({
+    ...a,
+    label: language === "de" ? (GERMAN_LABELS[a.label] || a.label) : a.label
+  }));
+
   // Convert pct → arc degrees
-  const total = ALLOCATIONS.reduce((s, a) => s + a.pct, 0);
+  const total = localizedAllocations.reduce((s, a) => s + a.pct, 0);
   let cursor = -90; // start at top
 
-  const segments = ALLOCATIONS.map((a) => {
+  const segments = localizedAllocations.map((a) => {
     const deg = (a.pct / total) * 360 - GAP;
     const start = cursor;
     const end = cursor + deg;
@@ -94,7 +109,7 @@ function PortfolioRing() {
           €12.4B
         </text>
         <text x={CX} y={CY + 10} textAnchor="middle" fill="#9ca3af" fontSize="9" fontFamily="DM Sans, sans-serif" letterSpacing="2">
-          ASSETS ADVISED
+          {t("hero.metricAssets").toUpperCase()}
         </text>
 
         {/* Hover label */}
@@ -112,7 +127,7 @@ function PortfolioRing() {
 
       {/* Legend */}
       <div className="mt-5 space-y-1.5 w-full max-w-[220px]">
-        {ALLOCATIONS.map((a, i) => (
+        {segments.map((a, i) => (
           <div
             key={a.label}
             className="flex items-center justify-between text-xs cursor-default"
@@ -133,6 +148,8 @@ function PortfolioRing() {
 }
 
 export default function Hero({ onStartArchitect, onViewServices }: HeroProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="bg-white">
       {/* Hero Core */}
@@ -148,17 +165,17 @@ export default function Hero({ onStartArchitect, onViewServices }: HeroProps) {
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-gold-light border border-brand-gold/20 rounded w-fit">
               <span className="w-1.5 h-1.5 bg-brand-gold rounded-full animate-ping" />
               <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.25em] text-brand-gold">
-                Private Wealth Advisory
+                {t("hero.tag")}
               </span>
             </div>
 
             <h1 className="font-serif text-4xl sm:text-5xl md:text-[3.6rem] text-brand-navy leading-[1.08] tracking-tight max-w-xl" style={{ fontWeight: 700 }}>
-              Institutional Trust,<br />
-              <span className="italic text-brand-gold" style={{ fontWeight: 600 }}>Bespoke Insights.</span>
+              {t("hero.title")}<br />
+              <span className="italic text-brand-gold" style={{ fontWeight: 600 }}>{t("hero.titleItalic")}</span>
             </h1>
 
             <p className="font-sans text-sm md:text-base text-gray-500 max-w-lg leading-relaxed">
-              Constantine Nixdorff provides strictly private wealth architecture, tax structuring, and portfolio governance for high-net-worth individuals, family offices, and corporate principals across the DACH region and beyond.
+              {t("hero.desc")}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -166,14 +183,14 @@ export default function Hero({ onStartArchitect, onViewServices }: HeroProps) {
                 onClick={onStartArchitect}
                 className="w-full sm:w-auto bg-brand-navy hover:bg-brand-navy-light text-white py-4 px-8 rounded font-sans text-xs font-semibold tracking-[0.15em] uppercase flex items-center justify-center gap-2 group transition-all duration-300 shadow-md hover:-translate-y-0.5 active:translate-y-0"
               >
-                Launch Wealth Architect
+                {t("hero.btnLaunch")}
                 <ArrowRight className="w-4 h-4 text-brand-gold group-hover:translate-x-1 transition-transform" />
               </button>
               <button
                 onClick={onViewServices}
                 className="w-full sm:w-auto border border-brand-gold text-brand-navy hover:bg-brand-gold-light py-4 px-8 rounded font-sans text-xs font-semibold tracking-[0.15em] uppercase transition-all duration-300"
               >
-                Explore Services
+                {t("hero.btnExplore")}
               </button>
             </div>
 
@@ -181,15 +198,15 @@ export default function Hero({ onStartArchitect, onViewServices }: HeroProps) {
             <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-100 max-w-md">
               <div>
                 <p className="font-serif text-2xl text-brand-navy" style={{ fontWeight: 700 }}>€12.4B</p>
-                <p className="font-sans text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">Assets Advised</p>
+                <p className="font-sans text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">{t("hero.metricAssets")}</p>
               </div>
               <div>
                 <p className="font-serif text-2xl text-brand-navy" style={{ fontWeight: 700 }}>BaFin</p>
-                <p className="font-sans text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">Regulated</p>
+                <p className="font-sans text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">{t("hero.metricRegulated")}</p>
               </div>
               <div>
                 <p className="font-serif text-2xl text-brand-navy" style={{ fontWeight: 700 }}>99.2%</p>
-                <p className="font-sans text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">Client Retention</p>
+                <p className="font-sans text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">{t("hero.metricRetention")}</p>
               </div>
             </div>
           </div>
@@ -210,7 +227,7 @@ export default function Hero({ onStartArchitect, onViewServices }: HeroProps) {
       <section className="bg-brand-navy text-white py-12 px-5 relative overflow-hidden">
         <div className="max-w-3xl mx-auto text-center space-y-4 relative z-10">
           <blockquote className="font-serif text-xl md:text-2xl italic text-brand-gold-light leading-relaxed" style={{ fontWeight: 500 }}>
-            "Every portfolio I build is a permanent reflection of your family legacy, sovereign ambition, and long-term vision."
+            "{t("hero.quote")}"
           </blockquote>
           <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-brand-gold font-semibold">
             — Constantine Nixdorff
@@ -222,3 +239,4 @@ export default function Hero({ onStartArchitect, onViewServices }: HeroProps) {
     </div>
   );
 }
+

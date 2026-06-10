@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useLanguage } from "../contexts/LanguageContext";
 
 const MODULES = [
   {
@@ -15,7 +16,7 @@ const MODULES = [
     title: "Investment & ETFs",
     subtitle: "Diversified Global Index Compounding",
     desc: "Evidence-based portfolio construction using diversified ETF strategies and direct investment vehicles optimised for global market participation.",
-    image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
+    image: "/assets/services/invest.jpg",
     imageAlt: "Stock market trading screens with graphs",
     stats: [{ label: "Avg TER", value: "0.18%" }, { label: "YTD Return", value: "+11.2%" }, { label: "Sharpe Ratio", value: "1.42" }],
   },
@@ -33,7 +34,7 @@ const MODULES = [
     title: "Insurance Analysis",
     subtitle: "Premium Risk Containment Audit",
     desc: "Quantifying risk exposure and identifying sophisticated coverage solutions to protect human capital, assets, and generational wealth.",
-    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80",
+    image: "/assets/services/insurance.jpg",
     imageAlt: "Professional signing an insurance or legal document",
     stats: [{ label: "Coverage Score", value: "62→94" }, { label: "Gaps Resolved", value: "3" }, { label: "Annual Premium", value: "€14.2K" }],
   },
@@ -51,7 +52,7 @@ const MODULES = [
     title: "Tax Optimisation",
     subtitle: "Cross-Border Compliance Mastery",
     desc: "Navigating complex tax landscapes to improve net returns through intelligent structuring and cross-border compliance mastery.",
-    image: "https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=800&q=80",
+    image: "/assets/services/tax.jpg",
     imageAlt: "Tax and accounting documents with calculator",
     stats: [{ label: "Effective Rate Before", value: "42%" }, { label: "Effective Rate After", value: "26%" }, { label: "Annual Saving", value: "€28.4K" }],
   },
@@ -60,7 +61,7 @@ const MODULES = [
     title: "Salary Negotiation",
     subtitle: "High-Stakes Executive Compensation",
     desc: "High-stakes negotiation advisory for executive contracts, compensation packages, and equity stakes to ensure your value is fully realised.",
-    image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80",
+    image: "/assets/services/salary.jpg",
     imageAlt: "Business professionals shaking hands after a deal",
     stats: [{ label: "Base Increase", value: "+€40K" }, { label: "Equity Unlocked", value: "€120K" }, { label: "Total Delta", value: "+€193K" }],
   },
@@ -78,7 +79,7 @@ const MODULES = [
     title: "Sustainable Investing",
     subtitle: "ESG-Aligned Capital Strategy",
     desc: "Aligning your capital with future-proof ESG criteria, transforming environmental and social responsibility into a driver of long-term performance.",
-    image: "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?w=800&q=80",
+    image: "/assets/services/sus.jpg",
     imageAlt: "Green sustainable investment concept with nature",
     stats: [{ label: "ESG Rating", value: "AA" }, { label: "Carbon Offset", value: "94%" }, { label: "SDG Aligned", value: "7 Goals" }],
   },
@@ -88,11 +89,39 @@ interface Props {
   onTriggerAdvisor: (specialty: string) => void;
 }
 
+const MODULE_KEYS = [
+  "planning",
+  "investment",
+  "retirement",
+  "insurance",
+  "career",
+  "tax",
+  "salary",
+  "international",
+  "sustainable"
+];
+
 export default function ScrollytellingSection({ onTriggerAdvisor }: Props) {
+  const { t } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState(0);
   const [fading, setFading] = useState(false);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Dynamically translate module contents
+  const localizedModules = MODULES.map((item, index) => {
+    const key = MODULE_KEYS[index];
+    return {
+      ...item,
+      title: t(`module.${key}.title`),
+      subtitle: t(`module.${key}.subtitle`),
+      desc: t(`module.${key}.desc`),
+      stats: item.stats.map((stat, sIdx) => ({
+        label: t(`module.${key}.stat${sIdx + 1}Label`),
+        value: t(`module.${key}.stat${sIdx + 1}Val`),
+      }))
+    };
+  });
 
   const setActive = (i: number) => {
     if (i === activeIndex) return;
@@ -118,7 +147,7 @@ export default function ScrollytellingSection({ onTriggerAdvisor }: Props) {
     return () => observers.forEach((o) => o.disconnect());
   }, [activeIndex]);
 
-  const mod = MODULES[activeIndex];
+  const mod = localizedModules[activeIndex];
 
   return (
     <section className="relative bg-[#f7f9fb] border-t border-gray-100">
@@ -126,11 +155,11 @@ export default function ScrollytellingSection({ onTriggerAdvisor }: Props) {
       <div className="px-5 md:px-16 max-w-7xl mx-auto pt-20 pb-10">
         <div className="border-l-4 border-brand-gold pl-6">
           <span className="text-[10px] font-sans font-semibold uppercase tracking-[0.25em] text-brand-gold block mb-2">
-            Our Capabilities
+            {t("capabilities.tag")}
           </span>
           <h2 className="font-serif text-3xl md:text-5xl text-brand-navy leading-tight" style={{ fontWeight: 700 }}>
-            Strategic Mastery<br />
-            <span className="italic" style={{ fontWeight: 600 }}>Across Disciplines</span>
+            {t("capabilities.title")}<br />
+            <span className="italic" style={{ fontWeight: 600 }}>{t("capabilities.titleItalic")}</span>
           </h2>
         </div>
       </div>
@@ -140,9 +169,9 @@ export default function ScrollytellingSection({ onTriggerAdvisor }: Props) {
 
         {/* Left: scrolling items */}
         <div className="space-y-[35vh] pb-[35vh] pt-10">
-          {MODULES.map((item, i) => (
+          {localizedModules.map((item, i) => (
             <div
-              key={item.title}
+              key={MODULES[i].title} // Use stable original title for key
               ref={(el) => { itemRefs.current[i] = el; }}
               className="transition-all duration-500"
               style={{
@@ -166,11 +195,11 @@ export default function ScrollytellingSection({ onTriggerAdvisor }: Props) {
                 {item.desc}
               </p>
               <button
-                onClick={() => onTriggerAdvisor(item.title)}
+                onClick={() => onTriggerAdvisor(MODULES[i].title)} // Pass original title to maintain wizard state mapping
                 className="inline-flex items-center gap-2 text-[10px] font-sans font-semibold uppercase tracking-widest text-brand-navy border border-brand-gold/40 px-5 py-2.5 rounded hover:bg-brand-gold/10 transition-colors"
                 style={{ opacity: activeIndex === i ? 1 : 0, transition: "opacity 0.4s ease" }}
               >
-                Explore Advisory
+                {t("capabilities.explore")}
                 <span className="material-symbols-outlined text-brand-gold" style={{ fontSize: "14px" }}>arrow_forward</span>
               </button>
             </div>
@@ -200,7 +229,7 @@ export default function ScrollytellingSection({ onTriggerAdvisor }: Props) {
             <div className="absolute bottom-0 left-0 right-0 p-8">
               {/* Module title */}
               <div className="mb-5">
-                <p className="font-sans text-xs uppercase tracking-[0.25em] text-white/50 mb-2">Active Module</p>
+                <p className="font-sans text-xs uppercase tracking-[0.25em] text-white/50 mb-2">{t("capabilities.activeModule")}</p>
                 <p className="font-serif text-3xl text-white" style={{ fontWeight: 700 }}>{mod.title}</p>
               </div>
 
@@ -240,3 +269,4 @@ export default function ScrollytellingSection({ onTriggerAdvisor }: Props) {
     </section>
   );
 }
+

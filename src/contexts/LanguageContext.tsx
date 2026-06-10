@@ -1,0 +1,651 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+
+export type Language = "en" | "de";
+
+interface LanguageContextProps {
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  toggleLanguage: () => void;
+  t: (key: string) => string;
+  reloadContent: () => Promise<void>;
+  rawContent: any;
+  loading: boolean;
+}
+
+const LanguageContext = createContext<LanguageContextProps | undefined>(undefined);
+
+const translations: Record<Language, Record<string, string>> = {
+  en: {
+    // Header
+    "header.contact": "Contact",
+
+    // Hero
+    "hero.tag": "Private Wealth Advisory",
+    "hero.title": "Institutional Trust,",
+    "hero.titleItalic": "Bespoke Insights.",
+    "hero.desc": "Constantine Nixdorff provides strictly private wealth architecture, tax structuring, and portfolio governance for high-net-worth individuals, family offices, and corporate principals across the DACH region and beyond.",
+    "hero.btnLaunch": "Launch Wealth Architect",
+    "hero.btnExplore": "Explore Services",
+    "hero.metricAssets": "Assets Advised",
+    "hero.metricRegulated": "Regulated",
+    "hero.metricRetention": "Client Retention",
+    "hero.quote": "Every portfolio I build is a permanent reflection of your family legacy, sovereign ambition, and long-term vision.",
+
+    // Trust Quote / Custody Section
+    "custody.tag": "Institutional Rigour",
+    "custody.title": "Fully BaFin Regulated Asset Custody Guards",
+    "custody.desc": "All client assets are partitioned under strict legal protections. By registering as Sondervermögen (special-purpose assets), your core capital pool is structurally immune to credit threats, corporate litigation risks, or vendor-side disputes.",
+    "custody.cardTitle": "Capital Insurance Integration",
+    "custody.cardDesc": "Sovereign-funded banking partnerships with top-tier deposit systems provide structural security thresholds far exceeding baseline European guidelines.",
+
+    // Scrollytelling Capabilities Section
+    "capabilities.tag": "Our Capabilities",
+    "capabilities.title": "Strategic Mastery",
+    "capabilities.titleItalic": "Across Disciplines",
+    "capabilities.explore": "Explore Advisory",
+    "capabilities.activeModule": "Active Module",
+
+    // Capabilities - Modules
+    "module.planning.title": "Financial Planning",
+    "module.planning.subtitle": "Bespoke Liquidity & Assets Architecture",
+    "module.planning.desc": "Holistic wealth architecture that integrates your current financial position with long-term aspirations, ensuring every asset serves a strategic purpose.",
+    "module.planning.stat1Label": "Avg. Plan Horizon",
+    "module.planning.stat1Val": "15 yrs",
+    "module.planning.stat2Label": "Capital Preserved",
+    "module.planning.stat2Val": "94%",
+    "module.planning.stat3Label": "Tax Efficiency",
+    "module.planning.stat3Val": "+62%",
+
+    "module.investment.title": "Investment & ETFs",
+    "module.investment.subtitle": "Diversified Global Index Compounding",
+    "module.investment.desc": "Evidence-based portfolio construction using diversified ETF strategies and direct investment vehicles optimised for global market participation.",
+    "module.investment.stat1Label": "Avg TER",
+    "module.investment.stat1Val": "0.18%",
+    "module.investment.stat2Label": "YTD Return",
+    "module.investment.stat2Val": "+11.2%",
+    "module.investment.stat3Label": "Sharpe Ratio",
+    "module.investment.stat3Val": "1.42",
+
+    "module.retirement.title": "Retirement Planning",
+    "module.retirement.subtitle": "Pre-Retirement Guard & Income Longevity",
+    "module.retirement.desc": "Securing your legacy through precision projection modelling and tax-efficient withdrawal strategies designed for enduring financial independence.",
+    "module.retirement.stat1Label": "Target Retire Age",
+    "module.retirement.stat1Val": "60",
+    "module.retirement.stat2Label": "Monthly Draw",
+    "module.retirement.stat2Val": "€8,400",
+    "module.retirement.stat3Label": "Longevity Cover",
+    "module.retirement.stat3Val": "30 yrs",
+
+    "module.insurance.title": "Insurance Analysis",
+    "module.insurance.subtitle": "Premium Risk Containment Audit",
+    "module.insurance.desc": "Quantifying risk exposure and identifying sophisticated coverage solutions to protect human capital, assets, and generational wealth.",
+    "module.insurance.stat1Label": "Coverage Score",
+    "module.insurance.stat1Val": "62→94",
+    "module.insurance.stat2Label": "Gaps Resolved",
+    "module.insurance.stat2Val": "3",
+    "module.insurance.stat3Label": "Annual Premium",
+    "module.insurance.stat3Val": "€14.2K",
+
+    "module.career.title": "Career Coaching",
+    "module.career.subtitle": "Executive Trajectory Optimisation",
+    "module.career.desc": "Strategic professional development for executives and high-performers looking to maximise their lifetime earning potential and market influence.",
+    "module.career.stat1Label": "Median Uplift",
+    "module.career.stat1Val": "+34%",
+    "module.career.stat2Label": "Time to VP",
+    "module.career.stat2Val": "2.1 yrs",
+    "module.career.stat3Label": "Equity Gained",
+    "module.career.stat3Val": "€180K",
+
+    "module.tax.title": "Tax Optimisation",
+    "module.tax.subtitle": "Cross-Border Compliance Mastery",
+    "module.tax.desc": "Navigating complex tax landscapes to improve net returns through intelligent structuring and cross-border compliance mastery.",
+    "module.tax.stat1Label": "Effective Rate Before",
+    "module.tax.stat1Val": "42%",
+    "module.tax.stat2Label": "Effective Rate After",
+    "module.tax.stat2Val": "26%",
+    "module.tax.stat3Label": "Annual Saving",
+    "module.tax.stat3Val": "€28.4K",
+
+    "module.salary.title": "Salary Negotiation",
+    "module.salary.subtitle": "High-Stakes Executive Compensation",
+    "module.salary.desc": "High-stakes negotiation advisory for executive contracts, compensation packages, and equity stakes to ensure your value is fully realised.",
+    "module.salary.stat1Label": "Base Increase",
+    "module.salary.stat1Val": "+€40K",
+    "module.salary.stat2Label": "Equity Unlocked",
+    "module.salary.stat2Val": "€120K",
+    "module.salary.stat3Label": "Total Delta",
+    "module.salary.stat3Val": "+€193K",
+
+    "module.international.title": "Internationals in Germany",
+    "module.international.subtitle": "Global Professionals, Local Precision",
+    "module.international.desc": "Specialised guidance for global professionals navigating the unique German financial, pension, and tax ecosystem with absolute confidence.",
+    "module.international.stat1Label": "Avg Tax Saving",
+    "module.international.stat1Val": "€9,200",
+    "module.international.stat2Label": "Setup Time",
+    "module.international.stat2Val": "6 weeks",
+    "module.international.stat3Label": "Compliance Risk",
+    "module.international.stat3Val": "Low",
+
+    "module.sustainable.title": "Sustainable Investing",
+    "module.sustainable.subtitle": "ESG-Aligned Capital Strategy",
+    "module.sustainable.desc": "Aligning your capital with future-proof ESG criteria, transforming environmental and social responsibility into a driver of long-term performance.",
+    "module.sustainable.stat1Label": "ESG Rating",
+    "module.sustainable.stat1Val": "AA",
+    "module.sustainable.stat2Label": "Carbon Offset",
+    "module.sustainable.stat2Val": "94%",
+    "module.sustainable.stat3Label": "SDG Aligned",
+    "module.sustainable.stat3Val": "7 Goals",
+
+    // Consultant Directory
+    "directory.tag": "Prestige Roster",
+    "directory.title": "Strategic Advisory Partners",
+    "directory.desc": "Select an expert to request a private briefing. Our advisors are fully certified under BaFin guidelines.",
+    "directory.scheduleTitle": "Schedule Private Briefing",
+    "directory.slotsLabel": "Available Consultation Openings",
+    "directory.briefLabel": "Describe Capital Profile Brief",
+    "directory.briefPlaceholder": "e.g., Seeking sovereign corporate structures for a tax GmbH in Berlin holding approximately €2M.",
+    "directory.emailLabel": "Contact Email (Encrypted Delivery)",
+    "directory.emailPlaceholder": "partner@preußen-holdings.com",
+    "directory.phoneLabel": "Contact Phone (Secured Line)",
+    "directory.phonePlaceholder": "+49 174 000000",
+    "directory.confirmBtn": "Confirm Private Briefing",
+    "directory.slotLockedTitle": "Adviser Slot Locked",
+    "directory.slotLockedDesc": "Select a Senior Partner Consultant from the roster list on the left to activate scheduling.",
+    "directory.bookingSecured": "Bespoke briefing secured",
+    "directory.passConsultant": "Consultant Allocated",
+    "directory.passCapacity": "Adviser Capacity",
+    "directory.passTimeslot": "Session timeslot",
+    "directory.passDate": "Registration Date",
+    "directory.passBrief": "Strategic Contextbrief",
+    "directory.passEmailTransmitted": "A secured invitation has been transmitted to {email}. It contains encrypted credential tokens for the secure portal call.",
+    "directory.rescheduleBtn": "Reschedule Session",
+    "directory.closeBtn": "Close Receipt",
+    "directory.bafinNotice": "*BaFin compliance: Individual consultations subject to regulatory recording protocols. Credentials not shareable.",
+    
+    // Consultant Profiles
+    "consultant.markus.title": "Senior Wealth Architect & Partner",
+    "consultant.markus.experience": "24 Years of Private Banking",
+    "consultant.markus.specialty": "Core Asset Allocation & Multi-Generational Family Estates",
+    "consultant.markus.bio": "Former Principal Trustee at Sovereign Zurich Bank. Specializes in building highly defensive capital shielding portfolios and structuring multi-generational private asset allocations.",
+    "consultant.elene.title": "Tax Strategy Director & Partner",
+    "consultant.elene.experience": "18 Years in German Tax Legislation",
+    "consultant.elene.specialty": "German Corporation Fiscal Shielding & Holding Structures",
+    "consultant.elene.bio": "Leading legal counsel specializing in German GmbH holdings, Sondervermögen structures under Section 26 of the Investment Code, and cross-border European capital shielding.",
+    "consultant.gabriel.title": "Director of Alternative Assets & ESG",
+    "consultant.gabriel.experience": "15 Years Alternative Capital Management",
+    "consultant.gabriel.specialty": "SFDR Article 9 ESG Core Filters & Private Debt Placement",
+    "consultant.gabriel.bio": "Expert advisor modeling low-correlation alternative assets. Specializes in screening equity pools against EU Green Deal taxonomies to lock down tax-incentivized yield structures.",
+    "consultant.sarah.title": "Senior Retirement Architect",
+    "consultant.sarah.experience": "16 Years in Custody Structures & ETF Framing",
+    "consultant.sarah.specialty": "High-Liquidity ETF Ladders & Pension Decumulation Plans",
+    "consultant.sarah.bio": "Pioneered Vanguard model adaptations for European executive clients. Deep focus on establishing risk-proof debt ladders and decumulation runaways.",
+
+    // Wealth Architect Wizard
+    "architect.loadingTitle": "Prestige Engine Active",
+    "architect.initializing": "Initializing client profiling...",
+    "architect.step1": "Step 1 of 3",
+    "architect.step2": "Step 2 of 3",
+    "architect.step3": "Step 3 of 3",
+    "architect.setupTitle": "Sovereign Onboarding & Jurisdiction Setup",
+    "architect.setupDesc": "Provide legal identification credentials to map appropriate fiscal jurisdictions.",
+    "architect.nameLabel": "Full Title & Legal Name",
+    "architect.namePlaceholder": "e.g., Dr. Roland von Preußen",
+    "architect.emailLabel": "Corporate Email Address",
+    "architect.emailPlaceholder": "e.g., roland@preussen-holdings.de",
+    "architect.jurisdictionLabel": "Regulatory Jurisdiction Map",
+    "architect.jurOption1": "Germany (Sondervermögen Shielding)",
+    "architect.jurOption2": "Switzerland / Zurich (FINMA Offshore Guard)",
+    "architect.jurOption3": "Luxembourg (CSSF Institutional Trust Structure)",
+    "architect.jurOption4": "United Kingdom & Global Cross-Border Trusts",
+    "architect.continueBtn": "Continue Setup",
+    
+    "architect.capitalTitle": "Capital Pool Structuring",
+    "architect.capitalDesc": "Determine total deployable net wealth levels and core strategic objectives.",
+    "architect.assetRangeLabel": "Investable Asset Value Range",
+    "architect.objectiveLabel": "Primary Capital Objective",
+    "architect.objOption1": "Sovereign Wealth Preservation",
+    "architect.objOption2": "High-Conviction Tactical Growth",
+    "architect.objOption3": "Inter-Generational Corporate Estate Strategy",
+    "architect.objOption4": "Tax-Protected Sustainable Energy Yield",
+    "architect.riskLabel": "Adaptive Risk Appetite Class",
+    "architect.riskOption1": "Conservative Capital Guard",
+    "architect.riskOption2": "Adaptive Moderate Structural Shield",
+    "architect.riskOption3": "High-Conviction Alpha Accumulator",
+    "architect.prevStep": "Previous Step",
+    "architect.configureFocus": "Configure Advisory Specialty",
+    
+    "architect.focusTitle": "Selective Advisory Focus Areas",
+    "architect.focusDesc": "Tag particular focus areas to feed specific instructions to the Strategic Director.",
+    "architect.lensesLabel": "Advisory Lenses (Pick at least one):",
+    "architect.submitBtn": "Build Bespoke Strategic Report",
+
+    // Generated Report View
+    "report.bannerProtocol": "Bespoke Wealth Architecture Protocol",
+    "report.resetBtn": "Reset Architect Form",
+    "report.confidential": "Highly Confidential",
+    "report.proposalTitle": "Bespoke Strategic Architecture Proposal",
+    "report.allocationTitle": "Suggested Asset Allocation Alignment",
+    "report.consolidatedPool": "Consolidated Wealth Pool",
+    "report.allReallocated": "100% of investable funds reallocated.",
+    "report.esgIndex": "Weighted target preservation ESG index: 92.8",
+    "report.pillarsTitle": "Core Architectural Pillars",
+    "report.actionableDeployment": "Actionable Deployment:",
+    "report.tacticsTitle": "Tactical Regional Implementation Specs",
+    "report.timelineTitle": "Phase Implementation Timeline",
+    
+    // Advisor Chat
+    "chat.seniorPartner": "Senior Advisory Partner: Markus von Preußen",
+    "chat.activeSession": "Active Secure Consultation Session • BaFin Regulated",
+    "chat.securedLine": "SECURED CORE LINE",
+    "chat.loadingStatus": "Markus is analyzing portfolio parameters...",
+    "chat.inputPlaceholder": "Ask Markus on tax sheltering, ETF model weights, or Bafin rules...",
+    "chat.transmit": "Transmit",
+    "chat.mockFallback": "My apologies, the transmission line experienced a temporary encryption verification refresh. Let us continue our consultation. Please repeat your question regarding the allocated portfolio asset classes.",
+
+    // Contact Page
+    "contact.tag": "Get in Touch",
+    "contact.title": "Begin Your",
+    "contact.titleItalic": "Private Consultation",
+    "contact.desc": "Constantine Nixdorff and his team offer strictly private consultations for high-net-worth individuals and institutional clients. All enquiries are treated with absolute discretion.",
+    "contact.email": "Email",
+    "contact.privateLine": "Private Line",
+    "contact.headquarters": "Headquarters",
+    "contact.hqCities": "Zürich · London · New York",
+    "contact.confidential": "Strictly Confidential. All communications are encrypted and handled exclusively by the Nixdorff advisory team. Response within 24 hours.",
+    "contact.fullName": "Full Name",
+    "contact.namePlaceholder": "Your full name",
+    "contact.emailAddress": "Email Address",
+    "contact.emailPlaceholder": "your@email.com",
+    "contact.subject": "Subject",
+    "contact.subOption": "Select a topic",
+    "contact.subOption1": "Wealth Architecture Consultation",
+    "contact.subOption2": "Tax Optimisation",
+    "contact.subOption3": "Investment Strategy",
+    "contact.subOption4": "Retirement Planning",
+    "contact.subOption5": "International Relocation (Germany)",
+    "contact.subOption6": "Other Enquiry",
+    "contact.message": "Message",
+    "contact.msgPlaceholder": "Briefly describe your financial situation or question...",
+    "contact.sendBtn": "Send Enquiry",
+    "contact.receivedTitle": "Enquiry Received",
+    "contact.receivedDesc": "Thank you. Constantine Nixdorff's team will respond to your enquiry within 24 hours under strict confidentiality.",
+
+    // Footer
+    "footer.weeklyBrief": "The Weekly Brief",
+    "footer.briefDesc": "Sophisticated market analytics, structural tax shielding adjustments, and regulatory compliance updates delivered directly to your workstation.",
+    "footer.emailPlaceholder": "Corporate Email Address",
+    "footer.subscribe": "Subscribe",
+    "footer.subscribed": "✓ Strategic Subscription Authorized.",
+    "footer.brandDesc": "Private wealth advisory and strategic portfolio governance for high-net-worth individuals, family offices, and corporate principals across Europe and beyond.",
+    "footer.globalNetwork": "Global Network",
+    "footer.london": "London Branch (Mayfair)",
+    "footer.berlin": "Berlin Capital Hub (Mitte)",
+    "footer.zurich": "Zurich Head Office (Bahnhofstrasse)",
+    "footer.newyork": "New York Office (Wall Street)",
+    "footer.governance": "Governance",
+    "footer.bafinAudit": "BaFin Audit Standards",
+    "footer.sfdr": "SFDR ESG Regulations",
+    "footer.ethics": "Ethics & Compliance Code",
+    "footer.mifid": "MIFID II Protocol Alignment",
+    "footer.securedPortals": "Secured Portals",
+    "footer.privacy": "Privacy Policy",
+    "footer.terms": "Terms of Service",
+    "footer.esg": "Corporate ESG Disclosures",
+    "footer.registry": "BaFin Registered Registry",
+    "footer.copyright": "Constantine Nixdorff. All rights reserved. Registered under BaFin reference regulatory numbers.",
+
+    // Mobile contact bar
+    "mobile.contact": "Contact Constantine Nixdorff"
+  },
+  de: {
+    // Header
+    "header.contact": "Kontakt",
+
+    // Hero
+    "hero.tag": "Private Vermögensberatung",
+    "hero.title": "Institutionelles Vertrauen,",
+    "hero.titleItalic": "Maßgeschneiderte Einblicke.",
+    "hero.desc": "Constantine Nixdorff bietet streng private Vermögensarchitektur, Steuerstrukturierung und Portfolio-Governance für sehr vermögende Privatpersonen, Family Offices und Unternehmensleiter in der gesamten DACH-Region und darüber hinaus.",
+    "hero.btnLaunch": "Vermögensarchitekt starten",
+    "hero.btnExplore": "Dienstleistungen erkunden",
+    "hero.metricAssets": "Verwaltetes Vermögen",
+    "hero.metricRegulated": "Reguliert",
+    "hero.metricRetention": "Kundenbindung",
+    "hero.quote": "Jedes von mir aufgebaute Portfolio ist ein dauerhaftes Spiegelbild Ihres familiären Vermächtnisses, Ihres souveränen Ehrgeizes und Ihrer langfristigen Vision.",
+
+    // Trust Quote / Custody Section
+    "custody.tag": "Institutionelle Strenge",
+    "custody.title": "Vollständig BaFin-regulierte Verwahrung von Vermögenswerten",
+    "custody.desc": "Alle Kundenvermögenswerte werden unter strengem gesetzlichen Schutz aufgeteilt. Durch die Registrierung als Sondervermögen ist Ihr Kernkapitalpool strukturell immun gegen Kreditrisiken, unternehmensrechtliche Prozessrisiken oder lieferantenseitige Streitigkeiten.",
+    "custody.cardTitle": "Integration der Kapitalversicherung",
+    "custody.cardDesc": "Staatlich finanzierte Bankenpartnerschaften mit erstklassigen Einlagensicherungssystemen bieten strukturelle Sicherheitsgrenzen, die weit über die europäischen Mindestrichtlinien hinausgehen.",
+
+    // Scrollytelling Capabilities Section
+    "capabilities.tag": "Unsere Fähigkeiten",
+    "capabilities.title": "Strategische Meisterschaft",
+    "capabilities.titleItalic": "Über Disziplinen hinweg",
+    "capabilities.explore": "Beratung erkunden",
+    "capabilities.activeModule": "Aktives Modul",
+
+    // Capabilities - Modules
+    "module.planning.title": "Finanzplanung",
+    "module.planning.subtitle": "Maßgeschneiderte Liquiditäts- & Vermögensarchitektur",
+    "module.planning.desc": "Ganzheitliche Vermögensarchitektur, die Ihre aktuelle finanzielle Situation mit Ihren langfristigen Zielen verbindet und sicherstellt, dass jeder Vermögenswert einem strategischen Zweck dient.",
+    "module.planning.stat1Label": "Durchschn. Planhorizont",
+    "module.planning.stat1Val": "15 J.",
+    "module.planning.stat2Label": "Erhaltenes Kapital",
+    "module.planning.stat2Val": "94%",
+    "module.planning.stat3Label": "Steuereffizienz",
+    "module.planning.stat3Val": "+62%",
+
+    "module.investment.title": "Investment & ETFs",
+    "module.investment.subtitle": "Diversifizierter globaler Index-Zinseszins",
+    "module.investment.desc": "Evidenzbasierte Portfoliokonstruktion mit diversifizierten ETF-Strategien und direkten Anlageinstrumenten, die für die globale Marktteilnahme optimiert sind.",
+    "module.investment.stat1Label": "Durchschn. TER",
+    "module.investment.stat1Val": "0.18%",
+    "module.investment.stat2Label": "Rendite YTD",
+    "module.investment.stat2Val": "+11.2%",
+    "module.investment.stat3Label": "Sharpe-Ratio",
+    "module.investment.stat3Val": "1.42",
+
+    "module.retirement.title": "Altersvorsorge",
+    "module.retirement.subtitle": "Schutz vor dem Ruhestand & Langlebigkeit des Einkommens",
+    "module.retirement.desc": "Sicherung Ihres Lebenswerks durch präzise Projektionsmodelle und steuereffiziente Entnahmestrategien für dauerhafte finanzielle Unabhängigkeit.",
+    "module.retirement.stat1Label": "Ziel-Renteneintritt",
+    "module.retirement.stat1Val": "60",
+    "module.retirement.stat2Label": "Monatl. Entnahme",
+    "module.retirement.stat2Val": "€8.400",
+    "module.retirement.stat3Label": "Langlebigkeitsschutz",
+    "module.retirement.stat3Val": "30 J.",
+
+    "module.insurance.title": "Versicherungsanalyse",
+    "module.insurance.subtitle": "Prüfung zur Eindämmung von Premium-Risiken",
+    "module.insurance.desc": "Quantifizierung der Risikoexposition und Ermittlung anspruchsvoller Deckungskonzepte zum Schutz von Humankapital, Sachwerten und Generationenvermögen.",
+    "module.insurance.stat1Label": "Deckungsgrad",
+    "module.insurance.stat1Val": "62→94",
+    "module.insurance.stat2Label": "Behobene Lücken",
+    "module.insurance.stat2Val": "3",
+    "module.insurance.stat3Label": "Jahresprämie",
+    "module.insurance.stat3Val": "€14.2K",
+
+    "module.career.title": "Karriere-Coaching",
+    "module.career.subtitle": "Optimierung der Führungslaufbahn",
+    "module.career.desc": "Strategische berufliche Weiterentwicklung für Führungskräfte und Leistungsträger, die ihr lebenslanges Einkommenspotenzial und ihren Markteinfluss maximieren möchten.",
+    "module.career.stat1Label": "Mediane Steigerung",
+    "module.career.stat1Val": "+34%",
+    "module.career.stat2Label": "Zeit bis zum VP",
+    "module.career.stat2Val": "2.1 J.",
+    "module.career.stat3Label": "Gewonnenes Eigenkap.",
+    "module.career.stat3Val": "€180K",
+
+    "module.tax.title": "Steueroptimierung",
+    "module.tax.subtitle": "Beherrschung grenzüberschreitender Compliance",
+    "module.tax.desc": "Navigieren in komplexen Steuerlandschaften zur Verbesserung der Nettorendite durch intelligente Strukturierung und Beherrschung grenzüberschreitender Compliance.",
+    "module.tax.stat1Label": "Effektiver Satz vorh.",
+    "module.tax.stat1Val": "42%",
+    "module.tax.stat2Label": "Effektiver Satz nachh.",
+    "module.tax.stat2Val": "26%",
+    "module.tax.stat3Label": "Jährl. Ersparnis",
+    "module.tax.stat3Val": "€28.4K",
+
+    "module.salary.title": "Gehaltsverhandlung",
+    "module.salary.subtitle": "Führungskräftevergütung bei hohem Einsatz",
+    "module.salary.desc": "Verhandlungsberatung bei hohem Einsatz für Vorstandsverträge, Vergütungspakete und Beteiligungen, um sicherzustellen, dass Ihr Wert voll ausgeschöpft wird.",
+    "module.salary.stat1Label": "Basis-Erhöhung",
+    "module.salary.stat1Val": "+€40K",
+    "module.salary.stat2Label": "Equity freigegeben",
+    "module.salary.stat2Val": "€120K",
+    "module.salary.stat3Label": "Gesamtes Delta",
+    "module.salary.stat3Val": "+€193K",
+
+    "module.international.title": "Ausländer in Deutschland",
+    "module.international.subtitle": "Globale Fachkräfte, lokale Präzision",
+    "module.international.desc": "Spezialisierte Beratung für globale Fachkräfte zur sicheren Navigation durch das einzigartige deutsche Finanz-, Renten- und Steuersystem.",
+    "module.international.stat1Label": "Durchschn. Ersparnis",
+    "module.international.stat1Val": "€9.200",
+    "module.international.stat2Label": "Einrichtungszeit",
+    "module.international.stat2Val": "6 Wochen",
+    "module.international.stat3Label": "Compliance-Risiko",
+    "module.international.stat3Val": "Niedrig",
+
+    "module.sustainable.title": "Nachhaltiges Investieren",
+    "module.sustainable.subtitle": "ESG-konforme Kapitalstrategie",
+    "module.sustainable.desc": "Ausrichtung Ihres Kapitals auf zukunftssichere ESG-Kriterien, wodurch ökologische und soziale Verantwortung zum Treiber langfristiger Performance wird.",
+    "module.sustainable.stat1Label": "ESG-Rating",
+    "module.sustainable.stat1Val": "AA",
+    "module.sustainable.stat2Label": "CO2-Kompensation",
+    "module.sustainable.stat2Val": "94%",
+    "module.sustainable.stat3Label": "SDG-konform",
+    "module.sustainable.stat3Val": "7 Ziele",
+
+    // Consultant Directory
+    "directory.tag": "Prestige-Roster",
+    "directory.title": "Strategische Beratungspartner",
+    "directory.desc": "Wählen Sie einen Experten aus, um ein privates Briefing anzufordern. Unsere Berater sind nach BaFin-Richtlinien vollständig zertifiziert.",
+    "directory.scheduleTitle": "Privates Briefing vereinbaren",
+    "directory.slotsLabel": "Verfügbare Beratungstermine",
+    "directory.briefLabel": "Kapitalprofil-Briefing beschreiben",
+    "directory.briefPlaceholder": "z.B. Suche nach souveränen Unternehmensstrukturen für eine vermögensverwaltende GmbH in Berlin mit ca. 2 Mio. €.",
+    "directory.emailLabel": "Kontakt-E-Mail (Verschlüsselte Zustellung)",
+    "directory.emailPlaceholder": "partner@preußen-holdings.com",
+    "directory.phoneLabel": "Kontakt-Telefon (Gesicherte Leitung)",
+    "directory.phonePlaceholder": "+49 174 000000",
+    "directory.confirmBtn": "Privates Briefing bestätigen",
+    "directory.slotLockedTitle": "Beratertermin gesperrt",
+    "directory.slotLockedDesc": "Wählen Sie einen Senior-Partner-Berater aus der Liste links aus, um die Terminplanung zu aktivieren.",
+    "directory.bookingSecured": "Bespoke-Briefing gesichert",
+    "directory.passConsultant": "Zugewiesener Berater",
+    "directory.passCapacity": "Beraterkapazität",
+    "directory.passTimeslot": "Sitzungszeitfenster",
+    "directory.passDate": "Registrierungsdatum",
+    "directory.passBrief": "Strategischer Kontextbrief",
+    "directory.passEmailTransmitted": "Eine gesicherte Einladung wurde an {email} übermittelt. Sie enthält verschlüsselte Zugangsdaten für den sicheren Portal-Anruf.",
+    "directory.rescheduleBtn": "Sitzung verschieben",
+    "directory.closeBtn": "Beleg schließen",
+    "directory.bafinNotice": "*BaFin-Compliance: Einzelkonsultationen unterliegen regulatorischen Aufzeichnungsprotokollen. Zugangsdaten nicht übertragbar.",
+    
+    // Consultant Profiles
+    "consultant.markus.title": "Senior-Vermögensarchitekt & Partner",
+    "consultant.markus.experience": "24 Jahre Private Banking",
+    "consultant.markus.specialty": "Kern-Anlageallokation & generationenübergreifende Familienvermögen",
+    "consultant.markus.bio": "Ehemaliger Haupttreuhänder bei der Sovereign Zurich Bank. Spezialisiert auf den Aufbau defensiver Kapitalschutzportfolios und die Strukturierung generationenübergreifender privater Vermögenswerte.",
+    "consultant.elene.title": "Direktorin für Steuerstrategie & Partnerin",
+    "consultant.elene.experience": "18 Jahre im deutschen Steuerrecht",
+    "consultant.elene.specialty": "Fiskalischer Schutz deutscher Unternehmen & Holdingstrukturen",
+    "consultant.elene.bio": "Führende Rechtsberaterin, spezialisiert auf deutsche GmbH-Holdings, Sondervermögen-Strukturen nach § 26 KAGB und grenzüberschreitenden europäischen Kapitalschutz.",
+    "consultant.gabriel.title": "Direktor für alternative Anlagen & ESG",
+    "consultant.gabriel.experience": "15 Jahre alternatives Kapitalmanagement",
+    "consultant.gabriel.specialty": "SFDR Artikel 9 ESG-Kernfilter & private Fremdkapitalplatzierung",
+    "consultant.gabriel.bio": "Experte für die Modellierung schwach korrelierter alternativer Anlagen. Spezialisiert auf das Screening von Eigenkapitalpools nach EU Green Deal Taxonomien zur Sicherung steuerlich begünstigter Renditestrukturen.",
+    "consultant.sarah.title": "Senior-Ruhestandsarchitektin",
+    "consultant.sarah.experience": "16 Jahre in Verwahrungsstrukturen & ETF-Framing",
+    "consultant.sarah.specialty": "Hochliquide ETF-Leitern & Renten-Entsparungspläne",
+    "consultant.sarah.bio": "Pionierarbeit bei der Anpassung von Vanguard-Modellen für europäische Führungskräfte. Fokus auf den Aufbau risikofreier Anleihe-Leitern und Entsparungspläne.",
+
+    // Wealth Architect Wizard
+    "architect.loadingTitle": "Prestige-Engine aktiv",
+    "architect.initializing": "Kundenprofilierung wird initialisiert...",
+    "architect.step1": "Schritt 1 von 3",
+    "architect.step2": "Schritt 2 von 3",
+    "architect.step3": "Schritt 3 von 3",
+    "architect.setupTitle": "Souveränes Onboarding & Einrichtung der Gerichtsbarkeit",
+    "architect.setupDesc": "Geben Sie rechtliche Identifikationsnachweise an, um die entsprechenden Steuergebiete zuzuordnen.",
+    "architect.nameLabel": "Vollständiger Titel & gesetzlicher Name",
+    "architect.namePlaceholder": "z.B. Dr. Roland von Preußen",
+    "architect.emailLabel": "Geschäftliche E-Mail-Adresse",
+    "architect.emailPlaceholder": "z.B. roland@preussen-holdings.de",
+    "architect.jurisdictionLabel": "Regulatorische Gerichtsbarkeit",
+    "architect.jurOption1": "Deutschland (Sondervermögen-Schutz)",
+    "architect.jurOption2": "Schweiz / Zürich (FINMA Offshore-Schutz)",
+    "architect.jurOption3": "Luxemburg (CSSF institutionelle Treuhandstruktur)",
+    "architect.jurOption4": "Großbritannien & globale grenzüberschreitende Trusts",
+    "architect.continueBtn": "Einrichtung fortsetzen",
+    
+    "architect.capitalTitle": "Kapitalpool-Strukturierung",
+    "architect.capitalDesc": "Bestimmen Sie das gesamte einsetzbare Nettovermögen und die wichtigsten strategischen Ziele.",
+    "architect.assetRangeLabel": "Bereich des anlegbaren Vermögenswerts",
+    "architect.objectiveLabel": "Primäres Kapitalziel",
+    "architect.objOption1": "Souveräner Vermächtniserhalt",
+    "architect.objOption2": "Taktisches Wachstum mit hoher Überzeugung",
+    "architect.objOption3": "Generationenübergreifende Unternehmensnachfolge",
+    "architect.objOption4": "Steuerbegünstigte nachhaltige Energierendite",
+    "architect.riskLabel": "Adaptive Risikobereitschaftsklasse",
+    "architect.riskOption1": "Konservativer Kapitalschutz",
+    "architect.riskOption2": "Adaptiver moderater Strukturschutz",
+    "architect.riskOption3": "Taktischer Alpha-Akkumulator mit hoher Überzeugung",
+    "architect.prevStep": "Vorheriger Schritt",
+    "architect.configureFocus": "Beratungsschwerpunkt konfigurieren",
+    
+    "architect.focusTitle": "Selektive Beratungsschwerpunkte",
+    "architect.focusDesc": "Markieren Sie bestimmte Schwerpunktbereiche, um dem Strategischen Direktor spezifische Anweisungen zu geben.",
+    "architect.lensesLabel": "Beratungsoptionen (Wählen Sie mindestens eine):",
+    "architect.submitBtn": "Maßgeschneiderten strategischen Bericht erstellen",
+
+    // Generated Report View
+    "report.bannerProtocol": "Maßgeschneidertes Vermögensarchitektur-Protokoll",
+    "report.resetBtn": "Architekten-Formular zurücksetzen",
+    "report.confidential": "Streng vertraulich",
+    "report.proposalTitle": "Maßgeschneiderter Vorschlag für die Vermögensarchitektur",
+    "report.allocationTitle": "Vorgeschlagene Ausrichtung der Vermögensallokation",
+    "report.consolidatedPool": "Konsolidierter Vermögenspool",
+    "report.allReallocated": "100 % der anlegbaren Mittel neu zugewiesen.",
+    "report.esgIndex": "Gewichteter Ziel-Erhaltungs-ESG-Index: 92,8",
+    "report.pillarsTitle": "Strategische Kernpfeiler",
+    "report.actionableDeployment": "Konkrete Umsetzungsschritte:",
+    "report.tacticsTitle": "Spezifikationen zur regionalen Umsetzung",
+    "report.timelineTitle": "Zeitplan der Implementierungsphasen",
+    
+    // Advisor Chat
+    "chat.seniorPartner": "Senior-Beratungspartner: Markus von Preußen",
+    "chat.activeSession": "Aktive sichere Beratungssitzung • BaFin-reguliert",
+    "chat.securedLine": "GESICHERTE KERNLEITUNG",
+    "chat.loadingStatus": "Markus analysiert Portfolioparameter...",
+    "chat.inputPlaceholder": "Fragen Sie Markus zu Steuersparmodellen, ETF-Modellgewichten oder BaFin-Regeln...",
+    "chat.transmit": "Senden",
+    "chat.mockFallback": "Ich bitte um Entschuldigung, die Übertragungsleitung war kurzzeitig durch eine Verschlüsselungsprüfung unterbrochen. Lassen Sie uns das Gespräch fortsetzen. Bitte wiederholen Sie Ihre Frage bezüglich der aufgeteilten Portfolio-Anlageklassen.",
+
+    // Contact Page
+    "contact.tag": "Kontakt aufnehmen",
+    "contact.title": "Beginnen Sie Ihre",
+    "contact.titleItalic": "Private Konsultation",
+    "contact.desc": "Constantine Nixdorff und sein Team bieten streng private Konsultationen für sehr vermögende Privatpersonen und institutionelle Kunden an. Alle Anfragen werden mit absoluter Diskretion behandelt.",
+    "contact.email": "E-Mail",
+    "contact.privateLine": "Direktleitung",
+    "contact.headquarters": "Hauptsitz",
+    "contact.hqCities": "Zürich · London · New York",
+    "contact.confidential": "Streng vertraulich. Alle Mitteilungen werden verschlüsselt und ausschließlich vom Nixdorff-Beratungsteam bearbeitet. Antwort innerhalb von 24 Stunden.",
+    "contact.fullName": "Vollständiger Name",
+    "contact.namePlaceholder": "Ihr vollständiger Name",
+    "contact.emailAddress": "E-Mail-Adresse",
+    "contact.emailPlaceholder": "ihre@email.de",
+    "contact.subject": "Betreff",
+    "contact.subOption": "Wählen Sie ein Thema",
+    "contact.subOption1": "Konsultation zur Vermögensarchitektur",
+    "contact.subOption2": "Steueroptimierung",
+    "contact.subOption3": "Investmentstrategie",
+    "contact.subOption4": "Altersvorsorgeplanung",
+    "contact.subOption5": "Internationale Relocation (Deutschland)",
+    "contact.subOption6": "Sonstige Anfrage",
+    "contact.message": "Nachricht",
+    "contact.msgPlaceholder": "Beschreiben Sie kurz Ihre finanzielle Situation oder Ihre Frage...",
+    "contact.sendBtn": "Anfrage senden",
+    "contact.receivedTitle": "Anfrage erhalten",
+    "contact.receivedDesc": "Vielen Dank. Das Team von Constantine Nixdorff wird Ihre Anfrage innerhalb von 24 Stunden unter strenger Vertraulichkeit beantworten.",
+
+    // Footer
+    "footer.weeklyBrief": "Der wöchentliche Bericht",
+    "footer.briefDesc": "Anspruchsvolle Marktanalysen, Anpassungen des strukturellen Steurschutzes und Updates zur Einhaltung gesetzlicher Vorschriften direkt an Ihren Arbeitsplatz geliefert.",
+    "footer.emailPlaceholder": "Geschäftliche E-Mail-Adresse",
+    "footer.subscribe": "Abonnieren",
+    "footer.subscribed": "✓ Strategisches Abonnement autorisiert.",
+    "footer.brandDesc": "Private Vermögensberatung und strategische Portfolio-Governance für sehr vermögende Privatpersonen, Family Offices und Unternehmensleiter in Europa und darüber hinaus.",
+    "footer.globalNetwork": "Globales Netzwerk",
+    "footer.london": "Niederlassung London (Mayfair)",
+    "footer.berlin": "Hauptstadt-Hub Berlin (Mitte)",
+    "footer.zurich": "Hauptsitz Zürich (Bahnhofstraße)",
+    "footer.newyork": "Niederlassung New York (Wall Street)",
+    "footer.governance": "Governance",
+    "footer.bafinAudit": "BaFin-Prüfungsstandards",
+    "footer.sfdr": "SFDR-ESG-Verordnungen",
+    "footer.ethics": "Ethik- & Compliance-Kodex",
+    "footer.mifid": "MIFID-II-Protokollausrichtung",
+    "footer.securedPortals": "Gesicherte Portale",
+    "footer.privacy": "Datenschutzerklärung",
+    "footer.terms": "Nutzungsbedingungen",
+    "footer.esg": "ESG-Offenlegungen von Unternehmen",
+    "footer.registry": "BaFin-registriertes Register",
+    "footer.copyright": "Constantine Nixdorff. Alle Rechte vorbehalten. Registriert unter BaFin-Referenzregulierungsnummern.",
+
+    // Mobile contact bar
+    "mobile.contact": "Constantine Nixdorff kontaktieren"
+  }
+};
+
+export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [language, setLanguageState] = useState<Language>("en");
+  const [activeTranslations, setActiveTranslations] = useState<Record<Language, Record<string, string>>>(translations);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchContent = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/content");
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.en && data.de) {
+          setActiveTranslations(data);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load active translations from /api/content, using fallback.", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchContent();
+  }, []);
+
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+  };
+
+  const toggleLanguage = () => {
+    setLanguageState((prev) => (prev === "en" ? "de" : "en"));
+  };
+
+  const reloadContent = async () => {
+    await fetchContent();
+  };
+
+  const t = (key: string): string => {
+    const dict = activeTranslations[language] || translations[language];
+    const fallbackDict = activeTranslations["en"] || translations["en"];
+    return dict[key] || fallbackDict[key] || key;
+  };
+
+  return (
+    <LanguageContext.Provider
+      value={{
+        language,
+        setLanguage,
+        toggleLanguage,
+        t,
+        reloadContent,
+        rawContent: activeTranslations,
+        loading
+      }}
+    >
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (context === undefined) {
+    throw new Error("useLanguage must be used within a LanguageProvider");
+  }
+  return context;
+};
