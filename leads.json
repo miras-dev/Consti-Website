@@ -58,5 +58,29 @@
     "meetingType": "unknown",
     "notes": "review tax structuring",
     "status": "New"
+  },
+  {
+    "id": "gu02xmsre",
+    "timestamp": "2026-06-10T08:08:04.744Z",
+    "name": "Miras",
+    "email": "",
+    "phone": "9207404868",
+    "meetingDate": "2026-06-11",
+    "meetingTime": "10:00",
+    "meetingType": "unknown",
+    "notes": "personal",
+    "status": "New"
+  },
+  {
+    "id": "crtk2r10e",
+    "timestamp": "2026-06-10T08:08:42.438Z",
+    "name": "Miras",
+    "email": "",
+    "phone": "9207404868",
+    "meetingDate": "2026-06-11",
+    "meetingTime": "10:00",
+    "meetingType": "unknown",
+    "notes": "Career coaching",
+    "status": "Confirmed"
   }
 ]
