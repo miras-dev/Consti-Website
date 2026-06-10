@@ -175,6 +175,10 @@ function copyRecursive(src: string, dest: string) {
       copyRecursive(path.join(src, child), path.join(dest, child));
     });
   } else if (exists) {
+    const destDir = path.dirname(dest);
+    if (!fs.existsSync(destDir)) {
+      fs.mkdirSync(destDir, { recursive: true });
+    }
     fs.copyFileSync(src, dest);
   }
 }
