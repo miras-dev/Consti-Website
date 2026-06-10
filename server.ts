@@ -23,6 +23,19 @@ function getOpenAIClient(): OpenAI {
 const app = express();
 app.use(express.json());
 
+  // Debug Endpoint to check if environment variables are loaded
+  app.get("/api/debug-env", (req, res) => {
+    const apiKey = process.env.OPENAI_API_KEY;
+    const prefix = apiKey ? `${apiKey.substring(0, 7)}...` : "none";
+    res.json({
+      hasApiKey: !!apiKey,
+      apiKeyLength: apiKey ? apiKey.length : 0,
+      apiKeyPrefix: prefix,
+      nodeEnv: process.env.NODE_ENV || "not set",
+      isVercel: !!process.env.VERCEL
+    });
+  });
+
   // API Route: Client Profile Strategic Analysis
   app.post("/api/advice", async (req, res) => {
     try {
