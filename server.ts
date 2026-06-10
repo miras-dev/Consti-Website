@@ -316,12 +316,6 @@ function extractPurpose(text: string): string | null {
     try {
       const { messages = [], context = {}, lang = "en" } = req.body;
 
-      // Fail fast with a clear error if API key is missing
-      const apiKey = process.env.OPENAI_API_KEY;
-      if (!apiKey) {
-        console.error("[/api/chat] OPENAI_API_KEY is not set in environment");
-        return res.status(500).json({ error: "API key not configured", debug: "OPENAI_API_KEY missing" });
-      }
 
       // 1. Load active settings config
       let config = {
