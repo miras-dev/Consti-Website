@@ -315,6 +315,7 @@ function extractPurpose(text: string): string | null {
   app.post("/api/chat", async (req, res) => {
     try {
       const { messages = [], context = {}, lang = "en" } = req.body;
+      console.log("[chat] hit, key present:", !!process.env.OPENAI_API_KEY, "lang:", lang);
 
 
       // 1. Load active settings config
@@ -942,6 +943,12 @@ Keep your responses succinct, structured, and profoundly strategic. Do not write
       console.log(`Prestige Advisory portal online at http://0.0.0.0:${PORT}`);
     });
   }
+
+  // Global error handler — catches any unhandled Express errors
+  app.use((err: any, _req: any, res: any, _next: any) => {
+    console.error("[express error handler]", err?.message, err?.stack);
+    res.status(500).json({ error: "Server error", debug: err?.message || String(err) });
+  });
 
   if (!process.env.VERCEL) {
     initLocalServer();
