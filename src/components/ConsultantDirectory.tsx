@@ -3,8 +3,10 @@ import {
   Users, Star, Calendar, Clock, Check, FileText, Landmark, ShieldCheck, Ticket, UserCheck, Sparkles, ChevronRight, CornerDownRight
 } from "lucide-react";
 import { Consultant } from "../types";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export default function ConsultantDirectory() {
+  const { t, language } = useLanguage();
   const [selectedConsultant, setSelectedConsultant] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [clientBrief, setClientBrief] = useState<string>("");
@@ -79,14 +81,40 @@ export default function ConsultantDirectory() {
     }
   ];
 
+  // Map static consultants array to translated fields dynamically
+  const localizedConsultants = consultants.map((con) => {
+    const localizedSlots = con.availableSlots.map(slot => {
+      if (language === "de") {
+        return slot
+          .replace("Monday", "Montag")
+          .replace("Tuesday", "Dienstag")
+          .replace("Wednesday", "Mittwoch")
+          .replace("Thursday", "Donnerstag")
+          .replace("Friday", "Freitag")
+          .replace("Saturday", "Samstag")
+          .replace("Sunday", "Sonntag");
+      }
+      return slot;
+    });
+
+    return {
+      ...con,
+      title: t(`consultant.${con.id}.title`),
+      experience: t(`consultant.${con.id}.experience`),
+      specialty: t(`consultant.${con.id}.specialty`),
+      bio: t(`consultant.${con.id}.bio`),
+      availableSlots: localizedSlots
+    };
+  });
+
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedConsultant || !selectedSlot || !clientBrief || !clientEmail) {
-      alert("Please complete the required details before finalizing scheduling.");
+      alert(language === "de" ? "Bitte füllen Sie alle erforderlichen Felder aus." : "Please complete the required details before finalizing scheduling.");
       return;
     }
 
-    const consultant = consultants.find(c => c.id === selectedConsultant);
+    const consultant = localizedConsultants.find(c => c.id === selectedConsultant);
     if (!consultant) return;
 
     // Build the high-end booking pass
@@ -97,7 +125,7 @@ export default function ConsultantDirectory() {
       slot: selectedSlot,
       brief: clientBrief,
       email: clientEmail,
-      dateBooking: new Date().toLocaleDateString('en-GB')
+      dateBooking: new Date().toLocaleDateString(language === "de" ? "de-DE" : "en-GB")
     });
   };
 
@@ -108,20 +136,22 @@ export default function ConsultantDirectory() {
     setClientBrief("");
   };
 
+  const currentConsultant = localizedConsultants.find(c => c.id === selectedConsultant);
+
   return (
     <div className="max-w-4xl mx-auto px-5 py-12" id="consultant-directory-workspace">
       
       {/* Dynamic Header */}
       <div className="text-center space-y-4 mb-12">
         <span className="font-sans text-[11px] font-bold uppercase tracking-[0.2em] text-brand-gold">
-          Prestige Roster
+          {t("directory.tag")}
         </span>
         <h2 className="font-serif text-3xl md:text-4xl text-brand-navy font-bold">
-          Strategic Advisory Partners
+          {t("directory.title")}
         </h2>
         <div className="w-12 h-[1px] bg-brand-gold mx-auto"></div>
         <p className="font-sans text-sm text-gray-500 max-w-lg mx-auto leading-relaxed">
-          Select an expert to request a private briefing. Our advisors are fully certified under BaFin guidelines.
+          {t("directory.desc")}
         </p>
       </div>
 
@@ -130,7 +160,7 @@ export default function ConsultantDirectory() {
           
           {/* Consultants Select Roster */}
           <div className="lg:col-span-7 space-y-6">
-            {consultants.map((con) => {
+            {localizedConsultants.map((con) => {
               const isSelected = selectedConsultant === con.id;
               return (
                 <div 
@@ -175,19 +205,19 @@ export default function ConsultantDirectory() {
 
           {/* Booking / Details Sidebar Section */}
           <div className="lg:col-span-5 bg-white border border-border-subtle p-6 rounded shadow-sm text-left sticky top-24">
-            {selectedConsultant ? (
+            {selectedConsultant && currentConsultant ? (
               <form onSubmit={handleBookingSubmit} className="space-y-5 animate-fadeIn" id="booking-form-element">
                 <p className="font-serif font-bold text-sm text-brand-navy border-b pb-2 uppercase tracking-wide">
-                  Schedule Private Briefing
+                  {t("directory.scheduleTitle")}
                 </p>
 
                 {/* Date slots selector */}
                 <div className="space-y-2">
                   <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                    Available Consultation Openings
+                    {t("directory.slotsLabel")}
                   </label>
                   <div className="grid grid-cols-1 gap-2">
-                    {consultants.find(c => c.id === selectedConsultant)?.availableSlots.map(slot => {
+                    {currentConsultant.availableSlots.map(slot => {
                       const isSlotSelected = selectedSlot === slot;
                       return (
                         <button
@@ -214,12 +244,12 @@ export default function ConsultantDirectory() {
                 {/* Briefing Text field */}
                 <div className="space-y-1.5">
                   <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                    Describe Capital Profile Brief
+                    {t("directory.briefLabel")}
                   </label>
                   <textarea
                     value={clientBrief}
                     onChange={(e) => setClientBrief(e.target.value)}
-                    placeholder="e.g., Seeking sovereign corporate structures for a tax GmbH in Berlin holding approximately €2M."
+                    placeholder={t("directory.briefPlaceholder")}
                     rows={3}
                     className="w-full bg-background-soft border border-gray-200 p-3 rounded text-xs outline-none focus:border-brand-navy text-gray-700"
                     required
@@ -229,13 +259,13 @@ export default function ConsultantDirectory() {
                 {/* Email Inputs */}
                 <div className="space-y-1.5">
                   <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                    Contact Email (Encrypted Delivery)
+                    {t("directory.emailLabel")}
                   </label>
                   <input
                     type="email"
                     value={clientEmail}
                     onChange={(e) => setClientEmail(e.target.value)}
-                    placeholder="partner@preußen-holdings.com"
+                    placeholder={t("directory.emailPlaceholder")}
                     className="w-full bg-background-soft border border-gray-200 p-2.5 rounded text-xs outline-none focus:border-brand-navy text-gray-700"
                     required
                   />
@@ -244,13 +274,13 @@ export default function ConsultantDirectory() {
                 {/* Phone Inputs */}
                 <div className="space-y-1.5">
                   <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                    Contact Phone (Secured Line)
+                    {t("directory.phoneLabel")}
                   </label>
                   <input
                     type="tel"
                     value={clientPhone}
                     onChange={(e) => setClientPhone(e.target.value)}
-                    placeholder="+49 174 000000"
+                    placeholder={t("directory.phonePlaceholder")}
                     className="w-full bg-background-soft border border-gray-200 p-2.5 rounded text-xs outline-none focus:border-brand-navy text-gray-700"
                   />
                 </div>
@@ -261,14 +291,14 @@ export default function ConsultantDirectory() {
                   id="final-book-btn"
                 >
                   <UserCheck className="w-4 h-4 text-brand-gold animate-bounce" />
-                  Confirm Private Briefing
+                  {t("directory.confirmBtn")}
                 </button>
               </form>
             ) : (
               <div className="p-8 text-center text-gray-400 space-y-3">
                 <Landmark className="w-10 h-10 mx-auto opacity-30 text-brand-navy" />
-                <p className="font-serif text-sm font-semibold text-brand-navy">Adviser Slot Locked</p>
-                <p className="font-sans text-xs">Select a Senior Partner Consultant from the roster list on the left to activate scheduling.</p>
+                <p className="font-serif text-sm font-semibold text-brand-navy">{t("directory.slotLockedTitle")}</p>
+                <p className="font-sans text-xs">{t("directory.slotLockedDesc")}</p>
               </div>
             )}
           </div>
@@ -283,7 +313,7 @@ export default function ConsultantDirectory() {
           
           <div className="text-center space-y-4">
             <Ticket className="w-10 h-10 mx-auto text-brand-gold" />
-            <h3 className="font-serif text-xl font-bold text-brand-navy">Bespoke briefing secured</h3>
+            <h3 className="font-serif text-xl font-bold text-brand-navy">{t("directory.bookingSecured")}</h3>
             <p className="font-sans text-[10px] bg-brand-gold-light text-brand-gold px-3 py-1 rounded inline-block font-bold tracking-widest uppercase">
               {bookingPass.passId}
             </p>
@@ -291,26 +321,26 @@ export default function ConsultantDirectory() {
 
           <div className="border-t border-b border-gray-100 my-6 py-6 space-y-3.5 text-left text-xs">
             <div className="flex justify-between">
-              <span className="text-gray-400 font-semibold font-sans uppercase text-[10px]">Consultant Allocated</span>
+              <span className="text-gray-400 font-semibold font-sans uppercase text-[10px]">{t("directory.passConsultant")}</span>
               <span className="font-serif font-extrabold text-brand-navy text-right">{bookingPass.consultantName}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400 font-semibold font-sans uppercase text-[10px]">Adviser Capacity</span>
+              <span className="text-gray-400 font-semibold font-sans uppercase text-[10px]">{t("directory.passCapacity")}</span>
               <span className="font-sans font-bold text-brand-gold text-right">{bookingPass.consultantTitle}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400 font-semibold font-sans uppercase text-[10px]">Session timeslot</span>
+              <span className="text-gray-400 font-semibold font-sans uppercase text-[10px]">{t("directory.passTimeslot")}</span>
               <span className="font-sans font-bold text-brand-navy text-right flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5 text-brand-gold" />
                 {bookingPass.slot}
               </span>
             </div>
             <div className="flex justify-between border-t pt-3">
-              <span className="text-gray-400 font-semibold font-sans uppercase text-[10px]">Registration Date</span>
+              <span className="text-gray-400 font-semibold font-sans uppercase text-[10px]">{t("directory.passDate")}</span>
               <span className="text-gray-500 font-medium">{bookingPass.dateBooking}</span>
             </div>
             <div className="border-t pt-3">
-              <p className="text-gray-400 font-semibold font-sans uppercase text-[10px] mb-1">Strategic Contextbrief</p>
+              <p className="text-gray-400 font-semibold font-sans uppercase text-[10px] mb-1">{t("directory.passBrief")}</p>
               <p className="bg-background-soft p-3 rounded font-sans italic text-gray-600 leading-relaxed text-[11px]">
                 "{bookingPass.brief}"
               </p>
@@ -321,7 +351,7 @@ export default function ConsultantDirectory() {
             <div className="bg-linear-to-r from-emerald-500/5 to-teal-500/5 border border-emerald-500/10 rounded p-4 text-xs flex items-start gap-2 text-left">
               <ShieldCheck className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
               <p className="text-[11px] text-gray-500 leading-relaxed">
-                A secured invitation has been transmitted to <strong>{bookingPass.email}</strong>. It contains encrypted credential tokens for the secure portal call.
+                {t("directory.passEmailTransmitted").replace("{email}", bookingPass.email)}
               </p>
             </div>
 
@@ -330,19 +360,19 @@ export default function ConsultantDirectory() {
                 onClick={handleCancelBooking}
                 className="w-full border border-gray-300 text-gray-500 hover:text-brand-navy py-3 px-4 rounded font-sans text-xs font-bold uppercase transition-all"
               >
-                Reschedule Session
+                {t("directory.rescheduleBtn")}
               </button>
               <button
                 onClick={() => setSelectedConsultant(null)}
                 className="w-full bg-brand-navy text-white hover:bg-brand-navy-light py-3 px-4 rounded font-sans text-xs font-bold uppercase transition-all"
               >
-                Close Receipt
+                {t("directory.closeBtn")}
               </button>
             </div>
           </div>
 
           <p className="text-[9px] text-gray-400 mt-6 text-center leading-relaxed">
-            *BaFin compliance: Individual consultations subject to regulatory recording protocols. Credentials not shareable.
+            {t("directory.bafinNotice")}
           </p>
 
         </div>

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "mj24rbr1f",
+    "timestamp": "2026-06-09T23:44:07.045Z",
+    "name": "Alex",
+    "email": "",
+    "phone": "",
+    "meetingDate": "11 June 2026",
+    "meetingTime": "10:00 AM",
+    "meetingType": "in-person",
+    "notes": "",
+    "status": "New"
+  },
+  {
+    "id": "sv7f0326d",
+    "timestamp": "2026-06-10T00:15:00.739Z",
+    "name": "Anonymous Client",
+    "email": "",
+    "phone": "",
+    "meetingDate": "11 June 2026",
+    "meetingTime": "10:00 AM",
+    "meetingType": "unknown",
+    "notes": "",
+    "status": "New"
+  },
+  {
+    "id": "8s8lu8mbg",
+    "timestamp": "2026-06-10T00:29:08.635Z",
+    "name": "Miras",
+    "email": "",
+    "phone": "9207404868",
+    "meetingDate": "",
+    "meetingTime": "",
+    "meetingType": "unknown",
+    "notes": "",
+    "status": "Confirmed"
+  },
+  {
+    "id": "nnq99ifqd",
+    "timestamp": "2026-06-10T00:37:01.389Z",
+    "name": "John",
+    "email": "",
+    "phone": "+49 170 123456",
+    "meetingDate": "2026-06-11",
+    "meetingTime": "10:00",
+    "meetingType": "unknown",
+    "notes": "Review tax structuring",
+    "status": "New"
+  }
+]
