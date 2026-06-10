@@ -105,7 +105,7 @@ function PortfolioRing() {
         ))}
 
         {/* Centre text */}
-        <text x={CX} y={CY - 10} textAnchor="middle" fill="#0d1c2e" fontSize="22" fontFamily="Cormorant Garamond, Georgia, serif" fontWeight="600">
+        <text x={CX} y={CY - 10} textAnchor="middle" fill="#0d1c2e" fontSize="22" fontFamily="Lora, Georgia, serif" fontWeight="600">
           €12.4B
         </text>
         <text x={CX} y={CY + 10} textAnchor="middle" fill="#9ca3af" fontSize="9" fontFamily="DM Sans, sans-serif" letterSpacing="2">
@@ -118,7 +118,7 @@ function PortfolioRing() {
             <text x={CX} y={CY + 30} textAnchor="middle" fill="#D4AF37" fontSize="10" fontFamily="DM Sans, sans-serif" letterSpacing="1">
               {segments[hovered].label}
             </text>
-            <text x={CX} y={CY + 44} textAnchor="middle" fill="#0d1c2e" fontSize="14" fontFamily="Cormorant Garamond, serif" fontWeight="600">
+            <text x={CX} y={CY + 44} textAnchor="middle" fill="#0d1c2e" fontSize="14" fontFamily="Lora, Georgia, serif" fontWeight="600">
               {segments[hovered].pct}%
             </text>
           </>
@@ -153,15 +153,10 @@ export default function Hero({ onStartArchitect, onViewServices }: HeroProps) {
   return (
     <div className="bg-white">
       {/* Hero Core */}
-      <section className="relative overflow-hidden border-b border-border-subtle" id="hero-section" style={{ minHeight: "92vh" }}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 h-full" style={{ minHeight: "92vh" }}>
-
-          {/* Left Text */}
-          <div className="flex flex-col justify-center pl-10 md:pl-20 pr-0 md:pr-0 py-24 space-y-7 z-10"
-            style={{
-              marginRight: "-100px"
-            }}
-          >
+      <section className="relative overflow-hidden border-b border-border-subtle bg-white flex items-center" id="hero-section" style={{ minHeight: "92vh" }}>
+        {/* Main Content Container centered with rest of the site */}
+        <div className="max-w-7xl mx-auto px-5 md:px-16 w-full relative z-10">
+          <div className="w-full lg:w-[60%] py-24 space-y-7">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-gold-light border border-brand-gold/20 rounded w-fit">
               <span className="w-1.5 h-1.5 bg-brand-gold rounded-full animate-ping" />
               <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.25em] text-brand-gold">
@@ -210,16 +205,15 @@ export default function Hero({ onStartArchitect, onViewServices }: HeroProps) {
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Right: Full-height portrait */}
-          <div className="hidden lg:block relative">
-            <img
-              src="/Hero.png"
-              alt="Constantine Nixdorff"
-              className="absolute inset-0 w-full h-full object-cover object-top"
-            />
-          </div>
-
+        {/* Absolute right hero image */}
+        <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-[45%] z-0">
+          <img
+            src="/Hero.png"
+            alt="Constantine Nixdorff"
+            className="w-full h-full object-cover object-top"
+          />
         </div>
       </section>
 
